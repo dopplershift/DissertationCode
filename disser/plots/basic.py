@@ -1,0 +1,2 @@
+class Plot(object):
+    pass

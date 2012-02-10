@@ -1,15 +1,27 @@
 import numpy as np
 import quantities as pq
 
+def log10(x, out=None):
+    """
+    Raises a ValueError if input cannot be rescaled to radians.
+
+    Returns a dimensionless quantity.
+    """
+    if not isinstance(x, pq.Quantity):
+        return np.log10(x, out)
+
+    return pq.Quantity(np.log10(x.rescale(pq.dimensionless).magnitude, out),
+                    copy=False)
+
 c = pq.constants.natural_unit_of_velocity.simplified
 
 zUnit = pq.CompoundUnit('mm**6/m**3')
 
 dB = pq.UnitQuantity('decibel', pq.dimensionless, 'dB')
-dBz = pq.UnitQuantity('decibels relative to 1 mm^6 m^-3',
-    pq.dimensionless, 'dBz')
-dBm = pq.UnitQuantity('decibels relative to 1 mW', pq.dimensionless, 'dBm')
-dBW = pq.UnitQuantity('decibels relative to 1 W', pq.dimensionless, 'dBW')
+dBz = pq.UnitQuantity('dB_relative_to_1_mm^6_m^-3',
+    pq.dimensionless, 'dBz', aliases=['dBZ'])
+dBm = pq.UnitQuantity('dB_relative_to_1_mW', pq.dimensionless, 'dBm')
+dBW = pq.UnitQuantity('dB_relative_to_1_watt', pq.dimensionless, 'dBW')
 
 def to_linear(dB):
     '''Convert a linear dimensionless value to decibels.'''
@@ -17,7 +29,7 @@ def to_linear(dB):
 
 def to_dB(lin):
     '''Convert a value in (dimensionless) decibels to linear units.'''
-    return 10. * np.log10(lin.rescale(pq.dimensionless))
+    return 10. * log10(lin)
 
 def make_dB(log):
     '''Take a log difference and attach dB units.'''
