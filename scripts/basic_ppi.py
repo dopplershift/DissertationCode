@@ -14,6 +14,7 @@ datatypes.TypePlotInfo[datatypes.Reflectivity] = dict(
 fig = plt.figure()
 ax = fig.add_subplot(1, 1, 1)
 ax.set_aspect('equal', 'datalim')
-ppi = PPIPlot(data.fields, var=datatypes.Reflectivity, ax=ax, rings=rings,
+varinfo = data.fields.grab(datatypes.Reflectivity, pol='V', source='ts')
+ppi = PPIPlot(data.fields, var=varinfo, ax=ax, rings=rings,
     labels=[])
 plt.show()

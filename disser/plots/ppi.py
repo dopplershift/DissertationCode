@@ -6,7 +6,8 @@ from disser.datatypes import TypePlotInfo
 
 class PPIPlot(Plot):
 
-    def __init__(self, data, var, x='x', y='y', ax=None, rings=None, labels=None):
+    def __init__(self, data, var, x='x', y='y', ax=None, rings=None,
+        labels=None):
         if ax is None:
             self._ax = plt.gca()
         else:
@@ -18,7 +19,7 @@ class PPIPlot(Plot):
         if rings is None:
             rings = range(10, 70, 10)
 
-        typeInfo = TypePlotInfo.get(var, None)
+        typeInfo = TypePlotInfo.get(var.type, None)
         if typeInfo is None:
             cmap = None
             norm = None

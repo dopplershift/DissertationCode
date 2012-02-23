@@ -1,3 +1,4 @@
+from collections import namedtuple
 import numpy as np
 import netCDF4
 import quantities as pq
@@ -25,16 +26,31 @@ class MetadataArray(object):
             return getattr(self.data, attr)
 
 
-class AttributeDict(dict): 
+class AttributeDict(dict):
 
     __getattr__ = dict.__getitem__
     __setattr__ = dict.__setitem__
 
 
+# This is a class to be able to query for the best data match to a given
+# set of metadata. This includes the data type, as well potentially other
+# matches like the height of the ob (i.e. mesonet data with air temp at 1m and
+# 10m) selecting radar data from time series vs. averaged and giving the
+# polarization
+class FieldStore(dict):
+    def grab(self, datatype, **keys):
+        potential = [k for k in self.keys() if k[0] is datatype]
+        return sorted(potential, key=self.sorter(**keys))[-1]
+    def sorter(self, **keys):
+        return lambda key: sum(key[key._fields.index(field)] == v
+            for ind,(field,v) in enumerate(keys.items())
+            if field in key._fields)
+
+
 class DataSet(AttributeDict):
 
     def __init__(self):
-        self.fields = dict()
+        self.fields = FieldStore()
         self._calc_cache = dict()
         self.metadata = []
         self.coordinates = []
@@ -77,6 +93,7 @@ class NetCDFData(DataSet):
 # TODO: Need to figure out how to integrate with "data types"
 
 class NetCDFRadarData(NetCDFData):
+    MomentInfo = namedtuple('MomentInfo', ['type', 'pol', 'source'])
     def __init__(self, fname):
         NetCDFData.__init__(self, fname)
 
@@ -126,8 +143,11 @@ class NetCDFRadarData(NetCDFData):
             - self.zdr)
 
         # TODO: Need to read in the diagnostic variables.
-        
-        self.fields[datatypes.Reflectivity] = self.ref_ts_H
+
+        self.fields[self.MomentInfo(type=datatypes.Reflectivity, pol='H', source='ts')] = self.ref_ts_H
+        self.fields[self.MomentInfo(type=datatypes.Reflectivity, pol='V', source='ts')] = self.ref_ts_V
+        self.fields[self.MomentInfo(type=datatypes.Reflectivity, pol='H', source='average')] = self.ref_H
+        self.fields[self.MomentInfo(type=datatypes.Reflectivity, pol='V', source='average')] = self.ref_V
         self.fields['x'] = self.xlocs
         self.fields['y'] = self.ylocs
 
