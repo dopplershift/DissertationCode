@@ -43,7 +43,7 @@ class FieldStore(dict):
         return sorted(potential, key=self.sorter(**keys))[-1]
     def sorter(self, **keys):
         return lambda key: sum(key[key._fields.index(field)] == v
-            for ind,(field,v) in enumerate(keys.items())
+            for ind, (field, v) in enumerate(keys.items())
             if field in key._fields)
 
 
@@ -90,10 +90,17 @@ class NetCDFData(DataSet):
             print 'Need to add support for: %s' % var.units
             return vals
 
-# TODO: Need to figure out how to integrate with "data types"
+# Make a base for moment info from a named tuple
+MIBase = namedtuple('MomentInfo', ['type', 'pol', 'source'])
+MIDefault = MIBase(*([None] * len(MIBase._fields)))
+
+# Extend from this to allow None as a default for some parameters. This is
+# easier than subclassing to implement default args.
+def MomentInfo(datatype, **kwargs):
+    return MIDefault._replace(type=datatype, **kwargs)
+
 
 class NetCDFRadarData(NetCDFData):
-    MomentInfo = namedtuple('MomentInfo', ['type', 'pol', 'source'])
     def __init__(self, fname):
         NetCDFData.__init__(self, fname)
 
@@ -129,33 +136,50 @@ class NetCDFRadarData(NetCDFData):
         self.process_channel('V')
         self.zdr_ts, self.rhohv, self.phidp_ts = auto_dual_pol(self.iq_H,
             self.iq_V, self.noise_pwr, self.noise_pwr)
+        self.rhohv = self.rhohv * pq.dimensionless
+        self.fields[MomentInfo(datatypes.RhoHV, source='ts')] = self.rhohv
+
         self.zdr_ts = units.dB * self.zdr_ts
+        self.fields[MomentInfo(datatypes.ZDR, source='ts')] = self.zdr_ts
+
         self.phidp_ts = pq.radians * self.phidp_ts
+        self.fields[MomentInfo(datatypes.PhiDP, source='ts')] = self.phidp_ts
 
         self.zdr = units.make_dB(self.ref_H - self.ref_V)
+        self.fields[MomentInfo(datatypes.ZDR, source='average')] = self.zdr
+
         self.kdp = self.readVar('KDP')
+        self.fields[MomentInfo(datatypes.KDP, source='average')] = self.kdp
+
         self.phidp = self.readVar('PhiDP')
 #        self.phidp = remainder(self.phi_dp, 360.)
-#        self.phidp2 = 2 * self.kdp.cumsum(axis=1) * (self.pulse_length / kilo)
+#        self.phidp2 = 2*self.kdp.cumsum(axis=1) * (self.pulse_length / kilo)
+        self.fields[MomentInfo(datatypes.KDP, source='average')] = self.phidp
+
         thgrad, rgrad = np.gradient(self.phidp_ts, 1, self.gate_length)
         self.kdp_ts = rgrad / 2.
-        self.diff_atten = (units.make_dB(self.unatten_pwr_H - self.unatten_pwr_V)
-            - self.zdr)
+        self.fields[MomentInfo(datatypes.KDP, source='ts')] = self.kdp_ts
+
+        self.diff_atten = (units.make_dB(self.unatten_pwr_H -
+            self.unatten_pwr_V) - self.zdr)
+        self.fields[MomentInfo(datatypes.DiffAtten,
+            source='average')] = self.diff_atten
 
         # TODO: Need to read in the diagnostic variables.
-
-        self.fields[self.MomentInfo(type=datatypes.Reflectivity, pol='H', source='ts')] = self.ref_ts_H
-        self.fields[self.MomentInfo(type=datatypes.Reflectivity, pol='V', source='ts')] = self.ref_ts_V
-        self.fields[self.MomentInfo(type=datatypes.Reflectivity, pol='H', source='average')] = self.ref_H
-        self.fields[self.MomentInfo(type=datatypes.Reflectivity, pol='V', source='average')] = self.ref_V
         self.fields['x'] = self.xlocs
         self.fields['y'] = self.ylocs
 
     def process_channel(self, pol):
         # Read moments directly from file
         self['ref_' + pol] = self.readVar('Reflectivity_%s' % pol)
+        self.fields[MomentInfo(datatypes.Reflectivity, pol=pol,
+            source='average')] = self['ref_' + pol]
+
         self['pwr_' + pol] = units.dBW_to_dBm(self.readVar('Power_%s' % pol))
-        self['unatten_pwr_' + pol]  = units.dBW_to_dBm(
+        self.fields[MomentInfo(datatypes.Power, pol=pol,
+            source='average')] = self['pwr_' + pol]
+
+        self['unatten_pwr_' + pol] = units.dBW_to_dBm(
             self.readVar('UnattenPower_%s' % pol))
 
         # Read time series data and calculate moments
@@ -165,19 +189,31 @@ class NetCDFRadarData(NetCDFData):
         pwr_ts = pq.watt * pwr_ts
         pwr_ts_dbm = units.to_dBm(pwr_ts)
         self['pwr_ts_' + pol] = pwr_ts
-        self['vel_ts_' + pol] = vel_ts
-        self['spw_ts_' + pol] = spw_ts
         self['pwr_ts_%s_dbm' % pol] = pwr_ts_dbm
+        self.fields[MomentInfo(datatypes.Power, pol=pol,
+            source='ts')] = self['pwr_ts_%s_dbm' % pol]
+
+        self['vel_ts_' + pol] = vel_ts
+        self.fields[MomentInfo(datatypes.DopplerVelocity, pol=pol,
+            source='ts')] = self['vel_ts_' + pol]
+
+        self['spw_ts_' + pol] = spw_ts
+        self.fields[MomentInfo(datatypes.SpectrumWidth, pol=pol,
+            source='ts')] = self['spw_ts_' + pol]
 
         # Convert time series power estimate to reflectivity factor
         self['rad_const_%s_dB' % pol] = units.make_dB(
             self.readVar('RefCalibration_%s' % pol))
         self['rad_const_' + pol] = units.to_linear(
             self['rad_const_%s_dB' % pol]) * pq.mm**6 / (pq.m**5 * pq.watt)
+
         self['ref_ts_' + pol] = units.to_dBz(
             pwr_ts * self.rng**2 * self['rad_const_' + pol])
+        self.fields[MomentInfo(datatypes.Reflectivity, pol=pol,
+            source='ts')] = self['ref_ts_' + pol]
 
         # Calculate attenuation from fields
         self['atten_' + pol] = units.make_dB(
             self['unatten_pwr_' + pol] - self['pwr_' + pol])
-
+        self.fields[MomentInfo(datatypes.Attenuation, pol=pol,
+            source='average')] = self['atten_' + pol]

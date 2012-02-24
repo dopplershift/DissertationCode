@@ -39,6 +39,7 @@ def getBestAlg(datatype, availTypes, unavailTypes=None):
         return None
 
 
+Power = DataType(name='Power', abbr='$P_r$')
 Reflectivity = DataType(name='Reflectivity', abbr='Z')
 DopplerVelocity = DataType(name='Doppler Velocity', abbr=r'$V_r$')
 SpectrumWidth = DataType(name='Spectrum Width', abbr=r'$\sigma_v$')
@@ -46,6 +47,8 @@ SpectrumWidth = DataType(name='Spectrum Width', abbr=r'$\sigma_v$')
 ZDR = DataType(name='Differential Reflectivity', abbr=r'$Z_{DR}$')
 KDP = DataType(name='Specific Differential Phase', abbr=r'$K_{DP}$')
 PhiDP = DataType(name='Differential Propagation Phase', abbr=r'$\Phi$')
+RhoHV = DataType(name='Co-Polar Cross-Correlation Coefficient',
+    abbr=r'$\Rho_{HV}$')
 
 Attenuation = DataType(name='Attenuation', abbr='A')
 DiffAtten = DataType(name='Differential Attenuation', abbr=r'$A_D$')
