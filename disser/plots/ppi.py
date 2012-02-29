@@ -1,3 +1,4 @@
+import numpy as np
 from matplotlib.patches import Circle
 import matplotlib.pyplot as plt
 from .basic import Plot
@@ -25,8 +26,10 @@ class PPIPlot(Plot):
         cmap = typeInfo['cmap']
         norm = typeInfo['norm']
 
-        self._mesh = ax.pcolormesh(data[x], data[y],
-            data[var].magnitude, cmap=cmap, norm=norm)
+        vals = data[var].magnitude
+        vals = np.ma.array(vals, mask=np.isnan(vals))
+        self._mesh = ax.pcolormesh(data[x], data[y], vals, cmap=cmap,
+            norm=norm)
 
         self._ring_patches = []
         for rng in rings:
