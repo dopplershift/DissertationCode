@@ -8,6 +8,7 @@ data = NetCDFRadarData('Sband_3600_20111010_210552.nc')
 
 rings = np.arange(10, 60, 10)
 
+datatypes.TypePlotInfo.set_defaults(cmap=get_cmap('Carbone42'))
 datatypes.TypePlotInfo[datatypes.Reflectivity] = dict(
     norm=plt.Normalize(-30, 80), cmap=get_cmap('Carbone42'))
 

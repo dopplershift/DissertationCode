@@ -19,13 +19,10 @@ class PPIPlot(Plot):
         if rings is None:
             rings = range(10, 70, 10)
 
-        typeInfo = TypePlotInfo.get(var.type, None)
-        if typeInfo is None:
-            cmap = None
-            norm = None
-        else:
-            cmap = typeInfo.get('cmap', None)
-            norm = typeInfo.get('norm', None)
+        # Rely on TypePlotInfo being always returning something
+        typeInfo = TypePlotInfo[var.type]
+        cmap = typeInfo['cmap']
+        norm = typeInfo['norm']
 
         self._mesh = ax.pcolormesh(data[x].magnitude, data[y].magnitude,
             data[var].magnitude, cmap=cmap, norm=norm)

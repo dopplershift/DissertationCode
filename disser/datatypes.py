@@ -1,8 +1,19 @@
-from collections import namedtuple
+from collections import namedtuple, defaultdict
 from .plugintools import PluginRegistry
 
 # Used to contain default information for plotting data types.
-TypePlotInfo = dict()
+class TypePlotInfoDict(defaultdict):
+    def __init__(self, **kwargs):
+        defaultdict.__init__(self, self.make_default, **kwargs)
+        self.defaults = defaultdict(lambda: None)
+
+    def set_defaults(self, **kwargs):
+        self.defaults.update(kwargs)
+
+    def make_default(self):
+        return self.defaults.copy()
+
+TypePlotInfo = TypePlotInfoDict()
 
 MomentRegistry = PluginRegistry()
 
