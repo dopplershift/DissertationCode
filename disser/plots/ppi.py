@@ -28,7 +28,7 @@ class PPIPlot(Plot):
 
         vals = data[var].magnitude
         vals = np.ma.array(vals, mask=np.isnan(vals))
-        self._mesh = ax.pcolormesh(data[x], data[y], vals, cmap=cmap,
+        self.mesh = ax.pcolormesh(data[x], data[y], vals, cmap=cmap,
             norm=norm)
 
         self._ring_patches = []
