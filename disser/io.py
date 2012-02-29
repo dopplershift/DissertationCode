@@ -130,7 +130,11 @@ class NetCDFRadarData(NetCDFData):
         self.ylocs = (self.rng * cos(self.az[:, np.newaxis])).rescale('km')
 
         self.vel = self.readVar('Velocity')
+        self.fields[MomentInfo(datatypes.DopplerVelocity, source='average',
+            pol='H')] = self.vel
         self.spw = self.readVar('SpectrumWidth')
+        self.fields[MomentInfo(datatypes.SpectrumWidth, source='average',
+            pol='H')] = self.spw
 
         self.process_channel('H')
         self.process_channel('V')
