@@ -91,8 +91,23 @@ class NetCDFData(DataSet):
             return vals
 
 # Make a base for moment info from a named tuple
-MIBase = namedtuple('MomentInfo', ['type', 'pol', 'source'])
-MIDefault = MIBase(*([None] * len(MIBase._fields)))
+class MomentInfo_(namedtuple('MomentInfo', ['type', 'pol', 'source'])):
+    def __str__(self):
+        abbr = self.type.abbr
+        if self.pol:
+            abbr = abbr.replace('$', '')
+            if '_' in abbr:
+                p1,p2 = abbr.split('_')
+                abbr = (p1 + '_' + '{' + p2.replace('}', '').replace('{', '')
+                    + self.pol + '}')
+            else:
+                abbr = abbr + '_{%s}' % self.pol
+            name = '$' + abbr + '$'
+        else:
+            name = abbr
+        return name + ' (%s)' % self.source.capitalize()
+
+MIDefault = MomentInfo_(*([None] * len(MomentInfo_._fields)))
 
 # Extend from this to allow None as a default for some parameters. This is
 # easier than subclassing to implement default args.
