@@ -126,8 +126,8 @@ class NetCDFRadarData(NetCDFData):
         self.noise_pwr_db = self.readVar('MinimumDetectableSignal')
         self.noise_pwr = units.to_linear(self.noise_pwr_db)
 
-        self.xlocs = self.rng * sin(self.az[:, np.newaxis])
-        self.ylocs = self.rng * cos(self.az[:, np.newaxis])
+        self.xlocs = (self.rng * sin(self.az[:, np.newaxis])).rescale('km')
+        self.ylocs = (self.rng * cos(self.az[:, np.newaxis])).rescale('km')
 
         self.vel = self.readVar('Velocity')
         self.spw = self.readVar('SpectrumWidth')

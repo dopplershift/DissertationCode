@@ -1,12 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import quantities as pq
 from disser.io import NetCDFRadarData
 from disser.plots import PPIPlot, get_cmap
 from disser import datatypes
 
 data = NetCDFRadarData('Sband_3600_20111010_210552.nc')
 
-rings = np.arange(10, 60, 10)
+rings = np.arange(10, 60, 10) * pq.kilometer
 
 datatypes.TypePlotInfo.set_defaults(cmap=get_cmap('Carbone42'))
 datatypes.TypePlotInfo[datatypes.Reflectivity] = dict(
