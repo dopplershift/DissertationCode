@@ -60,7 +60,7 @@ def dual_pol_covar(Rhh, Rvv, Rhv, noise_h, noise_v):
 
     phi_dp = np.angle(Rhv[..., 0])
 
-    return Zdr, rho_hv, phi_dp
+    return Zdr, np.abs(rho_hv), phi_dp
 
 
 def dual_pol_covar1(Rhh, Rvv, Rhv1, Rhv2):
