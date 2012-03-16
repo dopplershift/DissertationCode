@@ -28,7 +28,7 @@ class DataType(namedtuple('DataType', ['name', 'abbr'])):
     def __del__(self):
         if not MomentRegistry is None:
             MomentRegistry.unregister(self)
-    
+
     def add_source(self, algorithm):
         self.sources.append(algorithm)
 
@@ -38,7 +38,7 @@ def getBestAlg(datatype, availTypes, unavailTypes=None):
         unavailTypes = list()
     else:
         unavailTypes = list(unavailTypes)
-    
+
     for alg in datatype.sources:
         for src in alg.sources:
             if src not in availTypes:
@@ -59,7 +59,7 @@ ZDR = DataType(name='Differential Reflectivity', abbr=r'$Z_{DR}$')
 KDP = DataType(name='Specific Differential Phase', abbr=r'$K_{DP}$')
 PhiDP = DataType(name='Differential Propagation Phase', abbr=r'$\Phi$')
 RhoHV = DataType(name='Co-Polar Cross-Correlation Coefficient',
-    abbr=r'$\Rho_{HV}$')
+    abbr=r'$\rho_{HV}$')
 
 Attenuation = DataType(name='Attenuation', abbr='A')
 DiffAtten = DataType(name='Differential Attenuation', abbr=r'$A_D$')
