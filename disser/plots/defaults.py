@@ -21,6 +21,12 @@ datatypes.TypePlotInfo[datatypes.DopplerVelocity].update(
     norm=plt.Normalize(-30, 30))
 datatypes.TypePlotInfo[datatypes.SpectrumWidth].update(
     norm=plt.Normalize(0, 15))
+datatypes.TypePlotInfo[datatypes.Power].update(norm=plt.Normalize(-115, -25))
+datatypes.TypePlotInfo[datatypes.ZDR].update(norm=plt.Normalize(-5, 5))
+datatypes.TypePlotInfo[datatypes.PhiDP].update(norm=plt.Normalize(0, 75))
+datatypes.TypePlotInfo[datatypes.KDP].update(norm=plt.Normalize(-5, 25))
+datatypes.TypePlotInfo[datatypes.RhoHV].update(norm=plt.Normalize(0.98, 1.0))
+datatypes.TypePlotInfo[datatypes.DiffAtten].update(norm=plt.Normalize(0, 5))
 
 # Helper for labelling the colorbar
 def setup_cbar(cax, colorartist, units, pad=4):
