@@ -1,4 +1,5 @@
 import numpy as np
+from matplotlib import rcParams
 from functools import partial
 import quantities as pq
 pq.markup.format_units_latex = partial(pq.markup.format_units_latex,
@@ -27,6 +28,16 @@ datatypes.TypePlotInfo[datatypes.PhiDP].update(norm=plt.Normalize(0, 75))
 datatypes.TypePlotInfo[datatypes.KDP].update(norm=plt.Normalize(-5, 25))
 datatypes.TypePlotInfo[datatypes.RhoHV].update(norm=plt.Normalize(0.98, 1.0))
 datatypes.TypePlotInfo[datatypes.DiffAtten].update(norm=plt.Normalize(0, 5))
+
+# Set up some rcParams for figures
+rcParams['savefig.dpi'] = 150
+rcParams['font.size'] = 8
+rcParams['figure.dpi'] = 107 # For laptop
+rcParams['figure.figsize'] = (8, 4)
+rcParams['figure.subplot.left'] = 0.05
+rcParams['figure.subplot.right'] = 0.95
+rcParams['figure.subplot.top'] = 0.98
+rcParams['figure.subplot.bottom'] = 0.02
 
 # Helper for labelling the colorbar
 def setup_cbar(cax, colorartist, units, pad=4):
@@ -70,7 +81,7 @@ def multipanel_cbar_row(fig, layout, moments, data):
 
 def multipanel_cbar_each(fig, layout, moments, data):
     grid = ImageGrid(fig, (1, 1, 1), nrows_ncols=layout, direction='row',
-        share_all=True, axes_pad=0.70, aspect=True, cbar_mode='each',
+        share_all=True, axes_pad=0.50, aspect=True, cbar_mode='each',
         cbar_location='right', cbar_pad=0.15, cbar_size='10%')
 
     for m, ax, cax, panel_label in zip(moments, grid, grid.cbar_axes,
