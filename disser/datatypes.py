@@ -60,6 +60,8 @@ KDP = DataType(name='Specific Differential Phase', abbr=r'$K_{DP}$')
 PhiDP = DataType(name='Differential Propagation Phase', abbr=r'$\Phi$')
 RhoHV = DataType(name='Co-Polar Cross-Correlation Coefficient',
     abbr=r'$\rho_{HV}$')
+BackscatterPhase = DataType(name='Differential Phase on Backscatter',
+    abbr=r'$\delta$')
 
 Attenuation = DataType(name='Attenuation', abbr='A')
 DiffAtten = DataType(name='Differential Attenuation', abbr=r'$A_D$')

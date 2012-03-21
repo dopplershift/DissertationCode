@@ -192,6 +192,11 @@ class NetCDFRadarData(NetCDFData):
         self.fields[MomentInfo(datatypes.DiffAtten,
             source='average')] = self.diff_atten
 
+        self.delta = self.readVar('Delta')
+        self.delta.units = pq.degrees
+        self.fields[MomentInfo(datatypes.BackscatterPhase,
+            source='average')] = self.delta
+
         # TODO: Need to read in the diagnostic variables.
         self.fields['x'] = self.xlocs
         self.fields['y'] = self.ylocs
