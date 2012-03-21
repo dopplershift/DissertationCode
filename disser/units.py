@@ -41,7 +41,7 @@ def to_dBz(z):
 
 def to_dBm(w):
     '''Convert power in linear units to dBm.'''
-    return to_dB(w.rescale(pq.watt).magnitude) * dBm
+    return to_dB(w.rescale(pq.milliwatt).magnitude) * dBm
 
 def dBW_to_dBm(dbw):
     return (dbw.magnitude + 30.) * dBm
