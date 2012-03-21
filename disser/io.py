@@ -173,12 +173,14 @@ class NetCDFRadarData(NetCDFData):
         self.fields[MomentInfo(datatypes.ZDR, source='average')] = self.zdr
 
         self.kdp = self.readVar('KDP')
+        self.kdp.units = pq.degrees / pq.kilometer
         self.fields[MomentInfo(datatypes.KDP, source='average')] = self.kdp
 
         self.phidp = self.readVar('PhiDP')
+        self.phidp.units = pq.degrees
 #        self.phidp = remainder(self.phi_dp, 360.)
 #        self.phidp2 = 2*self.kdp.cumsum(axis=1) * (self.pulse_length / kilo)
-        self.fields[MomentInfo(datatypes.KDP, source='average')] = self.phidp
+        self.fields[MomentInfo(datatypes.PhiDP, source='average')] = self.phidp
 
         thgrad, rgrad = np.gradient(self.phidp_ts, 1,
                 self.gate_length.rescale(pq.kilometer))
