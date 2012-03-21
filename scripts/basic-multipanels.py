@@ -33,7 +33,7 @@ def make_plots(fname, save_prefix=None):
 
     if save_prefix:
         for num,f in enumerate(figs):
-            fig.savefig(save_prefix + '-%d.png' % num)
+            f.savefig(save_prefix + '-%d.png' % num)
     else:
         plt.show()
 
