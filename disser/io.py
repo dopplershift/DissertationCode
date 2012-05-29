@@ -3,7 +3,7 @@ import numpy as np
 import netCDF4
 import quantities as pq
 from quantities import sin, cos
-from . import units, datatypes
+from . import units, datatypes, calc
 from .sigproc import auto_moments, auto_dual_pol
 
 
@@ -93,6 +93,18 @@ class NetCDFData(DataSet):
         except LookupError:
             print 'Need to add support for: %s' % var.units
             return vals
+
+
+class ModelData(NetCDFData):
+    def __init__(self, fname):
+        super(ModelData, self).__init__(fname)
+        self.pressure = self.readVar('p')
+        theta = self.readVar('theta')
+        self.temp = calc.theta_to_temperature(theta, self.pressure)
+        self.qr = calc.mixing_ratio_to_density(self.readVar('qr'),
+                calc.air_density(self.temp, self.pressure))
+        self.nr = self.readVar('nr')
+
 
 # Make a base for moment info from a named tuple
 class MomentInfo_(namedtuple('MomentInfo', ['type', 'pol', 'source'])):
