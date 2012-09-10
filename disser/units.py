@@ -34,9 +34,9 @@ dBW = pq.UnitQuantity('dB_relative_to_1_watt', pq.dimensionless, 'dBW')
 
 exp_to_dB = 10.0 * np.log10(np.e) * dB
 
-def to_linear(dB):
+def to_linear(dB, newUnits=pq.dimensionless):
     '''Convert a value in (dimensionless) decibels to linear units.'''
-    return 10. ** (dB.rescale(pq.dimensionless) / 10.)
+    return 10. ** (dB.rescale(pq.dimensionless).magnitude / 10.) * newUnits
 
 def to_dB(lin):
     '''Convert a linear dimensionless value to decibels.'''
