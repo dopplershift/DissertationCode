@@ -47,9 +47,9 @@ def setup_cbar(cax, colorartist, units, pad=4):
     cbar.cbar_axis.labelpad = pad
 
 # Helpers for multi-column plots
-def multipanel_cbar_column(fig, layout, moments, data):
+def multipanel_cbar_column(fig, layout, moments, data, rect=(1, 1, 1)):
 
-    grid = ImageGrid(fig, (1, 1, 1), nrows_ncols=layout, direction='row',
+    grid = ImageGrid(fig, rect, nrows_ncols=layout, direction='row',
         share_all=True, axes_pad=0.45, aspect=True, cbar_mode='edge',
         cbar_location='bottom', cbar_pad=0.55, cbar_size='10%')
 
@@ -79,8 +79,8 @@ def multipanel_cbar_row(fig, layout, moments, data):
 
     return grid
 
-def multipanel_cbar_each(fig, layout, moments, data):
-    grid = ImageGrid(fig, (1, 1, 1), nrows_ncols=layout, direction='row',
+def multipanel_cbar_each(fig, layout, moments, data, rect=(1, 1, 1)):
+    grid = ImageGrid(fig, rect, nrows_ncols=layout, direction='row',
         share_all=True, axes_pad=0.50, aspect=True, cbar_mode='each',
         cbar_location='right', cbar_pad=0.15, cbar_size='10%')
 
