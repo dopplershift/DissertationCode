@@ -63,19 +63,19 @@ def multipanel_cbar_column(fig, layout, moments, data, rect=(1, 1, 1)):
 
     return grid
 
-def multipanel_cbar_row(fig, layout, moments, data):
+def multipanel_cbar_row(fig, layout, moments, data, rect=(1, 1, 1)):
     # TODO: The params here are not tuned
-    grid = ImageGrid(fig, (1, 1, 1), nrows_ncols=layout, direction='row',
-        share_all=True, axes_pad=0.45, aspect=True, cbar_mode='edge',
-        cbar_location='right', cbar_pad=0.55, cbar_size='10%')
+    grid = ImageGrid(fig, rect, nrows_ncols=layout, direction='column',
+        share_all=True, axes_pad=0.15, aspect=True, cbar_mode='edge',
+        cbar_location='right', cbar_pad=0.15, cbar_size='10%')
 
     for m, ax, cax, panel_label in zip(moments, grid, grid.cbar_axes,
             LabelGenerator('a')):
         ppi = PPIPlot(data.fields, var=m, ax=ax, rings=rings)
         panel_label.patch.set_boxstyle("round, pad=0., rounding_size=0.2")
         ax.add_artist(panel_label)
-        ax.set_title(m)
-        setup_cbar(cax, ppi.mesh, data.fields[m].dimensionality)
+        setup_cbar(cax, ppi.mesh, '%s (%s)' % (m,
+            data.fields[m].dimensionality))
 
     return grid
 
