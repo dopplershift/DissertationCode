@@ -204,6 +204,11 @@ class NetCDFRadarData(NetCDFData):
         self.fields[MomentInfo(datatypes.DiffAtten,
             source='average')] = self.diff_atten
 
+        self.diff_atten_ts = (units.make_dB(self.unatten_pwr_H -
+            self.unatten_pwr_V) - self.zdr_ts)
+        self.fields[MomentInfo(datatypes.DiffAtten,
+            source='ts')] = self.diff_atten_ts
+
         self.delta = self.readVar('Delta')
         self.delta.units = pq.degrees
         self.fields[MomentInfo(datatypes.BackscatterPhase,
@@ -261,3 +266,8 @@ class NetCDFRadarData(NetCDFData):
             self['unatten_pwr_' + pol] - self['pwr_' + pol])
         self.fields[MomentInfo(datatypes.Attenuation, pol=pol,
             source='average')] = self['atten_' + pol]
+
+        self['atten_ts_' + pol] = units.make_dB(
+            self['unatten_pwr_' + pol] - self['pwr_ts_%s_dbm' % pol])
+        self.fields[MomentInfo(datatypes.Attenuation, pol=pol,
+            source='ts')] = self['atten_ts_' + pol]
