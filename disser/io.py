@@ -45,6 +45,9 @@ class FieldStore(dict):
     def grab(self, datatype, **keys):
         return self.grabAll(datatype, **keys)[-1]
 
+    def grabData(self, datatype, **keys):
+        return self[self.grab(datatype, **keys)]
+
     def sorter(self, **keys):
         return lambda key: sum(key[key._fields.index(field)] == v
             for ind, (field, v) in enumerate(keys.items())
@@ -58,6 +61,13 @@ class DataSet(AttributeDict):
         self._calc_cache = dict()
         self.metadata = []
         self.coordinates = []
+
+    def addField(self, data, *args):
+        key = self.fieldKey(*args)
+        self.fields[key] = data
+
+    def fieldKey(self, *args):
+        return args[0]
 
 # Is there some way that we could almost have a database here of the fields
 # contained within our dataset. Each type matches a global type as well as
@@ -271,3 +281,6 @@ class NetCDFRadarData(NetCDFData):
             self['unatten_pwr_' + pol] - self['pwr_ts_%s_dbm' % pol])
         self.fields[MomentInfo(datatypes.Attenuation, pol=pol,
             source='ts')] = self['atten_ts_' + pol]
+
+    def fieldKey(self, *args):
+        return MomentInfo(*args)
