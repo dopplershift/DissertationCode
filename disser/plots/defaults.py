@@ -1,6 +1,7 @@
 import numpy as np
 from matplotlib import rcParams
 from functools import partial
+from itertools import cycle
 import quantities as pq
 pq.markup.format_units_latex = partial(pq.markup.format_units_latex,
     font='mathsf')
@@ -46,6 +47,13 @@ def setup_cbar(cax, colorartist, units, pad=4):
         cbar.set_label_text(units)
     cbar.cbar_axis.labelpad = pad
 
+# Helper to turn a data object into a sequence if necessary
+def make_data_iterator(data):
+    if hasattr(data, 'fields'):
+        return cycle([data])
+    else:
+        return data
+
 # Helpers for multi-column plots
 def multipanel_cbar_column(fig, layout, moments, data, rect=(1, 1, 1)):
 
@@ -53,13 +61,14 @@ def multipanel_cbar_column(fig, layout, moments, data, rect=(1, 1, 1)):
         share_all=True, axes_pad=0.45, aspect=True, cbar_mode='edge',
         cbar_location='bottom', cbar_pad=0.55, cbar_size='10%')
 
-    for m, ax, cax, panel_label in zip(moments, grid, grid.cbar_axes,
-            LabelGenerator('a')):
-        ppi = PPIPlot(data.fields, var=m, ax=ax, rings=rings)
+    data = make_data_iterator(data)
+    for d, m, ax, cax, panel_label in zip(data, moments, grid,
+            grid.cbar_axes, LabelGenerator('a')):
+        ppi = PPIPlot(d.fields, var=m, ax=ax, rings=rings)
         panel_label.patch.set_boxstyle("round, pad=0., rounding_size=0.2")
         ax.add_artist(panel_label)
         ax.set_title(m)
-        setup_cbar(cax, ppi.mesh, data.fields[m].dimensionality)
+        setup_cbar(cax, ppi.mesh, d.fields[m].dimensionality)
 
     return grid
 
@@ -69,13 +78,14 @@ def multipanel_cbar_row(fig, layout, moments, data, rect=(1, 1, 1)):
         share_all=True, axes_pad=0.15, aspect=True, cbar_mode='edge',
         cbar_location='right', cbar_pad=0.15, cbar_size='10%')
 
-    for m, ax, cax, panel_label in zip(moments, grid, grid.cbar_axes,
-            LabelGenerator('a')):
-        ppi = PPIPlot(data.fields, var=m, ax=ax, rings=rings)
+    data = make_data_iterator(data)
+    for d, m, ax, cax, panel_label in zip(data, moments, grid,
+            grid.cbar_axes, LabelGenerator('a')):
+        ppi = PPIPlot(d.fields, var=m, ax=ax, rings=rings)
         panel_label.patch.set_boxstyle("round, pad=0., rounding_size=0.2")
         ax.add_artist(panel_label)
         setup_cbar(cax, ppi.mesh, '%s (%s)' % (m,
-            data.fields[m].dimensionality))
+            d.fields[m].dimensionality))
 
     return grid
 
@@ -84,12 +94,13 @@ def multipanel_cbar_each(fig, layout, moments, data, rect=(1, 1, 1)):
         share_all=True, axes_pad=0.50, aspect=True, cbar_mode='each',
         cbar_location='right', cbar_pad=0.15, cbar_size='10%')
 
-    for m, ax, cax, panel_label in zip(moments, grid, grid.cbar_axes,
-            LabelGenerator('a')):
-        ppi = PPIPlot(data.fields, var=m, ax=ax, rings=rings)
+    data = make_data_iterator(data)
+    for d, m, ax, cax, panel_label in zip(data, moments, grid,
+            grid.cbar_axes, LabelGenerator('a')):
+        ppi = PPIPlot(d.fields, var=m, ax=ax, rings=rings)
         panel_label.patch.set_boxstyle("round, pad=0., rounding_size=0.2")
         ax.add_artist(panel_label)
         ax.set_title(m)
-        setup_cbar(cax, ppi.mesh, data.fields[m].dimensionality)
+        setup_cbar(cax, ppi.mesh, d.fields[m].dimensionality)
 
     return grid
