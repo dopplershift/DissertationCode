@@ -131,7 +131,11 @@ class MomentInfo_(namedtuple('MomentInfo', ['type', 'pol', 'source'])):
             name = '$' + abbr + '$'
         else:
             name = abbr
-        return name + ' (%s)' % self.source.capitalize()
+
+        if self.source:
+            return name + ' (%s)' % self.source.capitalize()
+        else:
+            return name
 
 MIDefault = MomentInfo_(*([None] * len(MomentInfo_._fields)))
 
