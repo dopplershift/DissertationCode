@@ -223,6 +223,15 @@ class NetCDFRadarData(NetCDFData):
         self.fields[MomentInfo(datatypes.DiffAtten,
             source='ts')] = self.diff_atten_ts
 
+        mean_diff_atten = self.nc.variables['MeanDiffAtten'][:]
+        # This way, when we take the mean, any set of pulses with a 0
+        # ends up nan. This way empty attenuation pulses don't end up
+        # producing a biased value, they just end up masked
+        mean_diff_atten[mean_diff_atten == 0.0] = np.nan
+        self.mean_diff_atten = -units.to_dB(mean_diff_atten.mean(axis=-1))
+        self.fields[MomentInfo(datatypes.DiffAtten,
+            source='calc')] = self.mean_diff_atten
+
         self.delta = self.readVar('Delta')
         self.delta.units = pq.degrees
         self.fields[MomentInfo(datatypes.BackscatterPhase,
@@ -285,6 +294,15 @@ class NetCDFRadarData(NetCDFData):
             self['unatten_pwr_' + pol] - self['pwr_ts_%s_dbm' % pol])
         self.fields[MomentInfo(datatypes.Attenuation, pol=pol,
             source='ts')] = self['atten_ts_' + pol]
+
+        mean_atten = self.nc.variables['MeanAtten'][:]
+        # This way, when we take the mean, any set of pulses with a 0
+        # ends up nan. This way empty attenuation pulses don't end up
+        # producing a biased value, they just end up masked
+        mean_atten[mean_atten == 0.0] = np.nan
+        self['mean_atten_' + pol] = -units.to_dB(mean_atten.mean(axis=-1))
+        self.fields[MomentInfo(datatypes.Attenuation, pol=pol,
+            source='calc')] = self['mean_atten_' + pol]
 
     def fieldKey(self, *args):
         return MomentInfo(*args)
