@@ -232,6 +232,21 @@ class NetCDFRadarData(NetCDFData):
         self.fields[MomentInfo(datatypes.DiffAtten,
             source='calc')] = self.mean_diff_atten
 
+        self.spec_mean_diff_atten = np.gradient(self.mean_diff_atten, 1,
+                self.gate_length)[1].rescale('dB/km')
+        self.fields[MomentInfo(datatypes.SpecDiffAtten,
+            source='calc')] = self.spec_mean_diff_atten
+
+        self.spec_diff_atten_ts = np.gradient(self.diff_atten_ts, 1,
+                self.gate_length)[1].rescale('dB/km')
+        self.fields[MomentInfo(datatypes.SpecDiffAtten,
+            source='ts')] = self.spec_diff_atten_ts
+
+        self.spec_diff_atten = np.gradient(self.diff_atten, 1,
+                self.gate_length)[1].rescale('dB/km')
+        self.fields[MomentInfo(datatypes.SpecDiffAtten,
+            source='average')] = self.spec_diff_atten
+
         self.delta = self.readVar('Delta')
         self.delta.units = pq.degrees
         self.fields[MomentInfo(datatypes.BackscatterPhase,
@@ -303,6 +318,21 @@ class NetCDFRadarData(NetCDFData):
         self['mean_atten_' + pol] = -units.to_dB(mean_atten.mean(axis=-1))
         self.fields[MomentInfo(datatypes.Attenuation, pol=pol,
             source='calc')] = self['mean_atten_' + pol]
+
+        self['spec_mean_atten_' + pol] = np.gradient(self['mean_atten_' + pol],
+                1, self.gate_length)[1].rescale('dB/km')
+        self.fields[MomentInfo(datatypes.SpecAttenuation, pol=pol,
+            source='calc')] = self['spec_mean_atten_' + pol]
+
+        self['spec_atten_ts_' + pol] = np.gradient(self['atten_ts_' + pol], 1,
+                self.gate_length)[1].rescale('dB/km')
+        self.fields[MomentInfo(datatypes.SpecAttenuation, pol=pol,
+            source='ts')] = self['spec_atten_ts_' + pol]
+
+        self['spec_atten_' + pol] = np.gradient(self['atten_' + pol], 1,
+                self.gate_length)[1].rescale('dB/km')
+        self.fields[MomentInfo(datatypes.SpecAttenuation, pol=pol,
+            source='average')] = self['spec_atten_' + pol]
 
     def fieldKey(self, *args):
         return MomentInfo(*args)

@@ -65,3 +65,7 @@ BackscatterPhase = DataType(name='Differential Phase on Backscatter',
 
 Attenuation = DataType(name='Attenuation', abbr='A')
 DiffAtten = DataType(name='Differential Attenuation', abbr=r'$A_D$')
+
+SpecAttenuation = DataType(name='Specific Attenuation', abbr=r'$\alpha$')
+SpecDiffAtten = DataType(name='Specific Differential Attenuation',
+        abbr=r'$\alpha_D$')

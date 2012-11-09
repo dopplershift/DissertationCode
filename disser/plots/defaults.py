@@ -29,6 +29,10 @@ datatypes.TypePlotInfo[datatypes.PhiDP].update(norm=plt.Normalize(0, 75))
 datatypes.TypePlotInfo[datatypes.KDP].update(norm=plt.Normalize(-5, 25))
 datatypes.TypePlotInfo[datatypes.RhoHV].update(norm=plt.Normalize(0.98, 1.0))
 datatypes.TypePlotInfo[datatypes.DiffAtten].update(norm=plt.Normalize(0, 5))
+datatypes.TypePlotInfo[datatypes.SpecAttenuation].update(
+        norm=plt.Normalize(0, 5))
+datatypes.TypePlotInfo[datatypes.SpecDiffAtten].update(
+        norm=plt.Normalize(0, 5))
 
 # Set up some rcParams for figures
 rcParams['savefig.dpi'] = 150
