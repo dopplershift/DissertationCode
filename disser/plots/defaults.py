@@ -15,6 +15,25 @@ from disser import datatypes
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import ImageGrid
 
+# Allow for selecting a norm based on wavelength, which is set
+# using a context manager elsewhere.
+class wavelengthNorm(object):
+    attribute_wrapper = True
+    def __init__(self, X, C, S):
+        self._xnorm = X
+        self._cnorm = C
+        self._snorm = S
+        self._attrMap = datatypes.plotInfoAttrs
+
+    def __call__(self):
+        wavelength = self._attrMap['wavelength']
+        if wavelength is None or wavelength < 0.04:
+            return self._xnorm
+        elif wavelength >= 0.1:
+            return self._snorm
+        else:
+            return self._cnorm
+
 # Default colormaps and norms get set up on import
 datatypes.TypePlotInfo.set_defaults(cmap=get_cmap('Carbone42'))
 datatypes.TypePlotInfo[datatypes.Reflectivity].update(
@@ -26,7 +45,9 @@ datatypes.TypePlotInfo[datatypes.SpectrumWidth].update(
 datatypes.TypePlotInfo[datatypes.Power].update(norm=plt.Normalize(-115, -25))
 datatypes.TypePlotInfo[datatypes.ZDR].update(norm=plt.Normalize(-5, 5))
 datatypes.TypePlotInfo[datatypes.PhiDP].update(norm=plt.Normalize(0, 75))
-datatypes.TypePlotInfo[datatypes.KDP].update(norm=plt.Normalize(-5, 25))
+_kdpNorms = wavelengthNorm(X=plt.Normalize(-5, 25), C=plt.Normalize(-5, 15),
+    S=plt.normalize(-5, 10))
+datatypes.TypePlotInfo[datatypes.KDP].update(norm=_kdpNorms)
 datatypes.TypePlotInfo[datatypes.RhoHV].update(norm=plt.Normalize(0.98, 1.0))
 datatypes.TypePlotInfo[datatypes.DiffAtten].update(norm=plt.Normalize(0, 5))
 datatypes.TypePlotInfo[datatypes.SpecAttenuation].update(
