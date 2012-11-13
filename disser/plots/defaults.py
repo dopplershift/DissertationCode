@@ -44,16 +44,31 @@ datatypes.TypePlotInfo[datatypes.SpectrumWidth].update(
     norm=plt.Normalize(0, 15))
 datatypes.TypePlotInfo[datatypes.Power].update(norm=plt.Normalize(-115, -25))
 datatypes.TypePlotInfo[datatypes.ZDR].update(norm=plt.Normalize(-5, 5))
-datatypes.TypePlotInfo[datatypes.PhiDP].update(norm=plt.Normalize(0, 75))
+
+_phiNorms = wavelengthNorm(X=plt.Normalize(-150, 100),
+        C=plt.Normalize(-150, 50), S=plt.normalize(-150, -75))
+datatypes.TypePlotInfo[datatypes.PhiDP].update(norm=_phiNorms)
+
 _kdpNorms = wavelengthNorm(X=plt.Normalize(-5, 25), C=plt.Normalize(-5, 15),
-    S=plt.normalize(-5, 10))
+        S=plt.normalize(-5, 10))
 datatypes.TypePlotInfo[datatypes.KDP].update(norm=_kdpNorms)
 datatypes.TypePlotInfo[datatypes.RhoHV].update(norm=plt.Normalize(0.98, 1.0))
-datatypes.TypePlotInfo[datatypes.DiffAtten].update(norm=plt.Normalize(0, 5))
-datatypes.TypePlotInfo[datatypes.SpecAttenuation].update(
-        norm=plt.Normalize(0, 5))
-datatypes.TypePlotInfo[datatypes.SpecDiffAtten].update(
-        norm=plt.Normalize(0, 5))
+
+_attenNorms = wavelengthNorm(X=plt.Normalize(0, 100), C=plt.Normalize(0, 20),
+        S=plt.Normalize(0, 5))
+datatypes.TypePlotInfo[datatypes.Attenuation].update(norm=_attenNorms)
+
+_diffANorms = wavelengthNorm(X=plt.Normalize(0, 20), C=plt.Normalize(0, 5),
+        S=plt.Normalize(0, 2))
+datatypes.TypePlotInfo[datatypes.DiffAtten].update(norm=_diffANorms)
+
+_specAttenNorms = wavelengthNorm(X=plt.Normalize(0, 8), C=plt.Normalize(0, 2),
+        S=plt.Normalize(0, 0.25))
+datatypes.TypePlotInfo[datatypes.SpecAttenuation].update(norm=_specAttenNorms)
+
+_specDANorms = wavelengthNorm(X=plt.Normalize(0, 1.0), C=plt.Normalize(0, 0.5),
+        S=plt.Normalize(0, 0.1))
+datatypes.TypePlotInfo[datatypes.SpecDiffAtten].update(norm=_specDANorms)
 
 # Set up some rcParams for figures
 rcParams['savefig.dpi'] = 150
