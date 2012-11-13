@@ -4,7 +4,7 @@ import netCDF4
 import quantities as pq
 from quantities import sin, cos
 from . import units, datatypes, calc
-from .sigproc import auto_moments, auto_dual_pol
+from .sigproc import auto_moments, auto_dual_pol, shift_phi
 
 
 # This could be used to keep some information attached to an array. Maybe.
@@ -194,6 +194,7 @@ class NetCDFRadarData(NetCDFData):
         self.phidp_ts = pq.radians * self.phidp_ts
         self.fields[MomentInfo(datatypes.PhiDP, source='ts')] = self.phidp_ts
         self.phidp_ts.units = pq.degrees
+        shift_phi(self.phidp_ts)
 
         self.zdr = units.make_dB(self.ref_H - self.ref_V)
         self.fields[MomentInfo(datatypes.ZDR, source='average')] = self.zdr
@@ -204,6 +205,7 @@ class NetCDFRadarData(NetCDFData):
 
         self.phidp = self.readVar('PhiDP')
         self.phidp.units = pq.degrees
+        shift_phi(self.phidp)
 #        self.phidp = remainder(self.phi_dp, 360.)
 #        self.phidp2 = 2*self.kdp.cumsum(axis=1) * (self.pulse_length / kilo)
         self.fields[MomentInfo(datatypes.PhiDP, source='average')] = self.phidp

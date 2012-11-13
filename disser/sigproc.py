@@ -1,5 +1,7 @@
 import numpy as np
+from quantities import degrees
 
+phidpOffset = -150 * degrees
 
 def correlate(x, y=None, maxlag=None, scale=None):
     if y is None:
@@ -72,3 +74,9 @@ def dual_pol_covar1(Rhh, Rvv, Rhv1, Rhv2):
     phi_dp = np.angle(Rhv1[..., 0])
 
     return Zdr, rho_hv, phi_dp
+
+
+def shift_phi(phi, init_val=phidpOffset):
+    from quantities import degrees
+    phi += init_val
+    phi[phi < -180. * degrees] += 360 * degrees
