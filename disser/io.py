@@ -38,14 +38,16 @@ class AttributeDict(dict):
 # 10m) selecting radar data from time series vs. averaged and giving the
 # polarization
 class FieldStore(dict):
-    def grabAll(self, datatype, **keys):
+    def grabAll(self, datatype, filt=None, **keys):
+        if filt is None:
+            filt = lambda k: True
         potential = [k for k in self.keys() if k[0] is datatype]
-        return sorted(potential, key=self.sorter(**keys))
+        return filter(filt, sorted(potential, key=self.sorter(**keys)))
 
-    def grab(self, datatype, **keys):
-        return self.grabAll(datatype, **keys)[-1]
+    def grab(self, datatype, filt=None, **keys):
+        return self.grabAll(datatype, filt, **keys)[-1]
 
-    def grabData(self, datatype, **keys):
+    def grabData(self, datatype, filt=None, **keys):
         return self[self.grab(datatype, **keys)]
 
     def sorter(self, **keys):
@@ -62,12 +64,17 @@ class DataSet(AttributeDict):
         self.metadata = []
         self.coordinates = []
 
-    def addField(self, data, *args):
-        key = self.fieldKey(*args)
+    def addField(self, data, *args, **kwargs):
+        key = self.fieldKey(*args, **kwargs)
         self.fields[key] = data
 
-    def fieldKey(self, *args):
-        return args[0]
+    def fieldKey(self, *args, **kwargs):
+        if args:
+            return args[0]
+        elif kwargs:
+            return kwargs[kwargs.keys()[0]]
+        else:
+            return None
 
 # Is there some way that we could almost have a database here of the fields
 # contained within our dataset. Each type matches a global type as well as
@@ -336,5 +343,5 @@ class NetCDFRadarData(NetCDFData):
         self.fields[MomentInfo(datatypes.SpecAttenuation, pol=pol,
             source='average')] = self['spec_atten_' + pol]
 
-    def fieldKey(self, *args):
-        return MomentInfo(*args)
+    def fieldKey(self, *args, **kwargs):
+        return MomentInfo(*args, **kwargs)
