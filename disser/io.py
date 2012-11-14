@@ -155,6 +155,7 @@ def MomentInfo(datatype, **kwargs):
 class NetCDFRadarData(NetCDFData):
     def __init__(self, fname):
         NetCDFData.__init__(self, fname)
+        self._band = None
 
         self.radar = self.nc.RadarName
 
@@ -342,6 +343,18 @@ class NetCDFRadarData(NetCDFData):
                 self.gate_length)[1].rescale('dB/km')
         self.fields[MomentInfo(datatypes.SpecAttenuation, pol=pol,
             source='average')] = self['spec_atten_' + pol]
+
+    @property
+    def waveBand(self):
+        if self._band is None:
+            if self.wavelength > 8 * pq.cm:
+                band = 'S'
+            elif self.wavelength > 4 * pq.cm:
+                band = 'C'
+            else:
+                band = 'X'
+            self._band = band
+        return self._band
 
     def fieldKey(self, *args, **kwargs):
         return MomentInfo(*args, **kwargs)
