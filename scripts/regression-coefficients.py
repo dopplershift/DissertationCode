@@ -80,9 +80,9 @@ nr = data.nr[mask][::100]
 za_fit_coeffs = dict()
 ka_fit_coeffs = dict()
 sc_fit_coeffs = dict()
-lams = {10 * pq.cm : 'S', 5.55 * pq.cm : 'C', 3.21 * pq.cm : 'X'}
+lams = {10 * pq.cm : 'S', 5.5 * pq.cm : 'C', 3.21 * pq.cm : 'X'}
 for l in lams:
-    temp = 20
+    temp = 10
     scatter_data = calc_scatter(qr, nr, dsd.gamma_from_moments, l, temp)
     za_fit_coeffs[(lams[l], 'H')] = fit_z_attenuation(scatter_data, pol='H')
     za_fit_coeffs[(lams[l], 'V')] = fit_z_attenuation(scatter_data, pol='V')
