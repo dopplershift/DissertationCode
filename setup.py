@@ -3,7 +3,7 @@ from disser import __version__
 
 setup(name = 'disser',
       version = str(__version__),
-      packages = ['disser', 'disser.plots'],
+      packages = ['disser', 'disser.plots', 'disser.atten'],
       author = 'Ryan May',
       author_email = 'rmay31@gmail.com',
       platforms = ['Linux', 'UNIX', 'Windows', 'MacOSX'],
