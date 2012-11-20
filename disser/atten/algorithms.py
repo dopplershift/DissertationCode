@@ -1,6 +1,8 @@
 import numpy as np
 import scipy.integrate as si
+import quantities as pq
 
+from ..units import dB
 from fit_coeffs import za_coeffs, ka_coeffs, sc_coeffs
 
 # This is the main calculation, as outlined in equation (24) in the Testud et al. (2000) paper
@@ -28,5 +30,11 @@ def I0(z, dr, b):
 
 def linear_phi(phi, coeff=None, lam='C', var='H'):
     if coeff is None:
-        coeff = ka_coeffs[lam, var]
+        coeff = ka_coeffs[lam, var] * dB / pq.degrees
+    else:
+        try:
+            coeff.magnitude
+        except AttributeError:
+            coeff = coeff * dB / pq.degrees
+
     return coeff * phi
