@@ -1,6 +1,6 @@
 import numpy as np
 from matplotlib import rcParams
-from functools import partial
+from functools import partial, wraps
 from itertools import cycle
 import quantities as pq
 pq.markup.format_units_latex = partial(pq.markup.format_units_latex,
@@ -80,6 +80,28 @@ rcParams['figure.subplot.right'] = 0.95
 rcParams['figure.subplot.top'] = 0.98
 rcParams['figure.subplot.bottom'] = 0.02
 
+class AxisDefaults(object):
+    def __init__(self):
+        self.setup = lambda ax: None
+
+    def __call__(self, func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            grid = func(*args, **kwargs)
+            self.setup(grid)
+            return grid
+        return wrapper
+
+axisDefaults = AxisDefaults()
+
+def default_ppi_axis(grid):
+    ax = grid[0]
+    ax.xaxis.set_major_locator(plt.MultipleLocator(10))
+    ax.set_ylim(0, 50)
+    ax.set_xlim(-20, 20)
+
+axisDefaults.setup = default_ppi_axis
+
 # Helper for labelling the colorbar
 def setup_cbar(cax, colorartist, units, pad=4):
     cbar = cax.colorbar(colorartist)
@@ -95,6 +117,7 @@ def make_data_iterator(data):
         return data
 
 # Helpers for multi-column plots
+@axisDefaults
 def multipanel_cbar_column(fig, layout, moments, data, rect=(1, 1, 1)):
 
     grid = ImageGrid(fig, rect, nrows_ncols=layout, direction='row',
@@ -112,6 +135,7 @@ def multipanel_cbar_column(fig, layout, moments, data, rect=(1, 1, 1)):
 
     return grid
 
+@axisDefaults
 def multipanel_cbar_row(fig, layout, moments, data, rect=(1, 1, 1)):
     # TODO: The params here are not tuned
     grid = ImageGrid(fig, rect, nrows_ncols=layout, direction='column',
@@ -129,6 +153,7 @@ def multipanel_cbar_row(fig, layout, moments, data, rect=(1, 1, 1)):
 
     return grid
 
+@axisDefaults
 def multipanel_cbar_each(fig, layout, moments, data, rect=(1, 1, 1)):
     grid = ImageGrid(fig, rect, nrows_ncols=layout, direction='row',
         share_all=True, axes_pad=0.50, aspect=True, cbar_mode='each',
