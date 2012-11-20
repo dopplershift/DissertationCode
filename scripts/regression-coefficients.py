@@ -55,7 +55,7 @@ def fit_kdp_attenuation(scatter, pol='H'):
         atten = scatter.diff_atten
     weights = (atten * atten).reshape(-1, 1)
     coeffs,fit = disser.tools.linear_regression(kdp.reshape(-1, 1),
-            atten.reshape(-1, 1), weights)
+            atten.reshape(-1, 1), weights, intercept=False)
     return coeffs
 
 def fit_all_attenuation(scatter, pol='H'):
