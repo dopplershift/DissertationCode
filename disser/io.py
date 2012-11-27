@@ -358,3 +358,29 @@ class NetCDFRadarData(NetCDFData):
 
     def fieldKey(self, *args, **kwargs):
         return MomentInfo(*args, **kwargs)
+
+
+class DataCache(dict):
+    '''Class to simplify mass loading of data files into a cache.'''
+    def __init__(self, dirpath, keygen, klass=NetCDFRadarData, pattern='*'):
+        self._path = dirpath
+        self._keygen = keygen
+        self._dataClass = klass
+        self._pattern = pattern
+        self.load()
+
+    def load(self):
+        import glob
+        import os.path
+        self.clear()
+        for datafile in glob.glob(os.path.join(self._path, self._pattern)):
+            data = self._dataClass(datafile)
+            key = self._keygen(data)
+            self[key] = data
+
+    def sub_keys(self):
+        'Returns a list of the sets of unique sub keys in the cache.'
+        # Take list of keys, turn into a tuple of lists of the "sub keys"
+        # from each tuple. Put these into sets to get the unique ones and
+        # return a list of sets.
+        return map(set, zip(*self.keys()))
