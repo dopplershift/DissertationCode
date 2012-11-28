@@ -29,7 +29,7 @@ class AttenuationAlgorithm(object):
         args = self.process_data(data)
         atten = self.alg()(*(args + (coeffs,)), var=var)
         dt, pol = self.typeInfo[var]
-        data.addField(atten, dt, pol=pol, source=self.alg().__name__)
+        data.addField(atten, dt, pol=pol, source=self.__class__.__name__)
         return atten
 
 
@@ -60,7 +60,7 @@ def I0(z, dr, b):
     return db_conv * b * np.trapz(10 ** ((b / 10.) * z), dx=dr)
 
 
-def linear(phi, coeff=None, var='H'):
+def linear(phi, coeff=0.08, var='H'):
     try:
         coeff.magnitude
     except AttributeError:
@@ -76,3 +76,8 @@ class LinearPhi(AttenuationAlgorithm):
     def process_data(self, data):
         return (data.fields.grabData(datatypes.PhiDP) - phidpOffset,)
 linearPhi = LinearPhi()
+
+class LinearPhiFixed(LinearPhi):
+    coeffs = {('C', 'H') : 0.08, ('C', 'diff') : 0.02, ('X', 'H') : 0.233,
+            ('X', 'diff') : 0.033}
+linearPhiFixed = LinearPhiFixed()
