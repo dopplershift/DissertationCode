@@ -1,1 +1,3 @@
 *.npz
+temper_runs
+ref_runs
