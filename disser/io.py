@@ -378,6 +378,7 @@ class DataCache(dict):
         self._dataClass = klass
         self._pattern = pattern
         self.load()
+        self.key_sorter = lambda k: k
 
     def load(self):
         import glob
@@ -390,7 +391,16 @@ class DataCache(dict):
 
     def sub_keys(self):
         'Returns a list of the sets of unique sub keys in the cache.'
-        # Take list of keys, turn into a tuple of lists of the "sub keys"
-        # from each tuple. Put these into sets to get the unique ones and
-        # return a list of sets.
-        return map(set, zip(*self.keys()))
+        # Initialize a list of items for each position
+        keylists = []
+        for i in range(len(self.keys()[0])):
+            keylists.append([])
+
+        # Sort all the keys and loop over, adding each tuple position's value
+        # only once.
+        for key in sorted(self.keys(), key=self.key_sorter):
+            for ind, item in enumerate(key):
+                if item not in keylists[ind]:
+                    keylists[ind].append(item)
+
+        return keylists
