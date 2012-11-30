@@ -153,7 +153,7 @@ def MomentInfo(datatype, **kwargs):
 
 
 class NetCDFRadarData(NetCDFData):
-    def __init__(self, fname):
+    def __init__(self, fname, freeIQ=True):
         NetCDFData.__init__(self, fname)
         self._band = None
 
@@ -265,6 +265,11 @@ class NetCDFRadarData(NetCDFData):
         # TODO: Need to read in the diagnostic variables.
         self.fields['x'] = self.xlocs
         self.fields['y'] = self.ylocs
+
+        # If we're allowed, delete the IQ data to reduce memory usage.
+        if freeIQ:
+            del self['iq_H']
+            del self['iq_V']
 
     def process_channel(self, pol):
         # Read moments directly from file
