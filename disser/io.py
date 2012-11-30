@@ -38,9 +38,14 @@ class AttributeDict(dict):
 # 10m) selecting radar data from time series vs. averaged and giving the
 # polarization
 class FieldStore(dict):
+    def __init__(self, **kwargs):
+        super(FieldStore, self).__init__(**kwargs)
+        self.default_keys = {}
+
     def grabAll(self, datatype, filt=None, **keys):
         if filt is None:
             filt = lambda k: True
+        keys.update(self.default_keys)
         potential = [k for k in self.keys() if k[0] is datatype]
         return filter(filt, sorted(potential, key=self.sorter(**keys)))
 
