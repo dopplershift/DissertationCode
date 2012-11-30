@@ -372,11 +372,13 @@ class NetCDFRadarData(NetCDFData):
 
 class DataCache(dict):
     '''Class to simplify mass loading of data files into a cache.'''
-    def __init__(self, dirpath, keygen, klass=NetCDFRadarData, pattern='*'):
+    def __init__(self, dirpath, keygen, subkeynames, klass=NetCDFRadarData,
+            pattern='*'):
         self._path = dirpath
         self._keygen = keygen
         self._dataClass = klass
         self._pattern = pattern
+        self._subkeynames = subkeynames
         self.load()
         self.key_sorter = lambda k: k
 
@@ -388,6 +390,18 @@ class DataCache(dict):
             data = self._dataClass(datafile)
             key = self._keygen(data)
             self[key] = data
+
+    def query(self, **kwargs):
+        # Associate each keyword argument with the appropriate position in the
+        # key tuple
+        colvals = [(ind,kwargs[keyname])
+                for ind,keyname in enumerate(self._subkeynames)
+                if keyname in kwargs]
+
+        # Return every item in the cache where the key tuple matches for the
+        # appropriate columns
+        return [self[key] for key in sorted(self, key=self.key_sorter)
+                if all(key[col] == val for col,val in colvals)]
 
     def sub_keys(self):
         'Returns a list of the sets of unique sub keys in the cache.'
