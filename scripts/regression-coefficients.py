@@ -11,7 +11,7 @@ import disser.io
 import dsd
 
 ScatterInfo = namedtuple('ScatterInfo', 'z zdr kdp atten diff_atten temps')
-def calc_scatter(qr, nr, dist_func, lam, temp):
+def calc_scatter(qr, nr, dist_func, lam, temp, canting_width):
     try:
         len(temp)
     except TypeError:
@@ -25,7 +25,7 @@ def calc_scatter(qr, nr, dist_func, lam, temp):
     diff_atten = np.empty_like(z)
     temps = np.empty_like(z)
     for i,t in enumerate(temp):
-        scat = disser.scatter.bulk_scatter(lam, t, dist, d)
+        scat = disser.scatter.bulk_scatter(lam, t, dist, d, canting_width)
         kdp[i] = scat.kdp.rescale('deg/km').magnitude
         zdr[i] = disser.units.to_linear(scat.zdr)
         z[i] = disser.units.to_linear(scat.z)
@@ -81,9 +81,11 @@ za_fit_coeffs = dict()
 ka_fit_coeffs = dict()
 sc_fit_coeffs = dict()
 lams = {10 * pq.cm : 'S', 5.5 * pq.cm : 'C', 3.21 * pq.cm : 'X'}
+temp = 10
+canting_width = 10.
 for l in lams:
-    temp = 10
-    scatter_data = calc_scatter(qr, nr, dsd.gamma_from_moments, l, temp)
+    scatter_data = calc_scatter(qr, nr, dsd.gamma_from_moments, l, temp,
+            canting_width)
     za_fit_coeffs[(lams[l], 'H')] = fit_z_attenuation(scatter_data, pol='H')
     za_fit_coeffs[(lams[l], 'V')] = fit_z_attenuation(scatter_data, pol='V')
 
@@ -105,7 +107,8 @@ with open('fit_coeffs.py', 'w') as outfile:
     outfile.write('assumed_tempc = %d\n' % temp)
     outfile.write('assumed_wavelength = %s\n' % repr(inv_lams))
     outfile.write('assumed_shape = "Brandes"\n')
+    outfile.write('assumed_canting_width = %d\n' % canting_width)
     outfile.write('za_coeffs = %s\n' % repr(za_fit_coeffs))
     outfile.write('ka_coeffs = %s\n' % repr(ka_fit_coeffs))
     outfile.write('sc_coeffs = %s\n' % repr(sc_fit_coeffs))
-    outfile.write('del array, cm')
+    outfile.write('del array, cm\n')
