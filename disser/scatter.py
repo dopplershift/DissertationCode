@@ -6,11 +6,13 @@ import quantities as pq
 
 ScatterResults = namedtuple('ScatterResults',
     'z zdr atten diff_atten kdp delta')
-def bulk_scatter(wavelength, temp, dist, diameters):
+def bulk_scatter(wavelength, temp, dist, diameters, canting_width=None):
     csec_units = 'mm**2'
 
     scatt = scattering.scatterer(wavelength, temp, 'water',
             diameters=diameters, shape='oblate')
+    if canting_width is not None:
+        scatt.angle_width = canting_width
     scatt.set_scattering_model('tmatrix')
 
     z = to_dBz(scatt.get_reflectivity_factor(dist, polar='h'))
