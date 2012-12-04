@@ -5,31 +5,40 @@ import quantities as pq
 from .. import datatypes
 from ..plugintools import PluginRegistry
 from ..units import dB
-from ..sigproc import phidpOffset
 from fit_coeffs import za_coeffs, ka_coeffs, sc_coeffs
 
 class AttenuationRegistry(PluginRegistry):
     def runAll(self, data, var):
         for alg in self:
             alg(data, var)
-attenRegistry = AttenuationRegistry()
+    def register(self, name, dt, kinds, coeffs):
+        def wrapper(func):
+            alg = AttenuationAlgorithm(name, func, dt, kinds, coeffs)
+            PluginRegistry.register(self, alg)
+            return func
+        return wrapper
+attenAlgs = AttenuationRegistry()
 
 class AttenuationAlgorithm(object):
     typeInfo = {'H':(datatypes.Attenuation, 'H'),
                 'V':(datatypes.Attenuation, 'V'),
                 'diff':(datatypes.DiffAtten, None)}
 
-    def __init__(self):
-        attenRegistry.register(self)
+    def __init__(self, name, alg, dt, kinds, coeffs):
+        self.name = name
+        self.alg = alg
+        self.dt = dt
+        self.kinds = kinds
+        self.coeffs = coeffs
 
     def __call__(self, data, var='H'):
         # TODO: Need to handle automatically calculation of diffAtten from
         # H and V, if necessary
         coeffs = self.coeffs[data.waveBand, var]
-        args = self.process_data(data)
-        atten = self.alg()(*(args + (coeffs,)), var=var)
+        args = [data.fields.grabData(f, pol=var) for f in self.dt]
+        atten = self.alg(*(args + [coeffs]))
         dt, pol = self.typeInfo[var]
-        data.addField(atten, dt, pol=pol, source=self.__class__.__name__)
+        data.addField(atten, dt, pol=pol, source=self.name)
         return atten
 
 
@@ -60,24 +69,15 @@ def I0(z, dr, b):
     return db_conv * b * np.trapz(10 ** ((b / 10.) * z), dx=dr)
 
 
-def linear(phi, coeff=0.08, var='H'):
+bringi_coeffs = {('C', 'H') : 0.08, ('C', 'diff') : 0.02, ('X', 'H') : 0.233,
+        ('X', 'diff') : 0.033}
+
+@attenAlgs.register('LinearBringi', [datatypes.PhiDP], ('H', 'diff'), bringi_coeffs)
+@attenAlgs.register('Linear', [datatypes.PhiDP], ('H', 'diff'), ka_coeffs)
+def linear(phi, coeff=0.08):
     try:
         coeff.magnitude
     except AttributeError:
         coeff = coeff * dB / pq.degrees
 
     return coeff * phi
-
-class LinearPhi(AttenuationAlgorithm):
-    coeffs = ka_coeffs
-    types = ('H', 'diff')
-    def alg(self):
-        return linear
-    def process_data(self, data):
-        return (data.fields.grabData(datatypes.PhiDP) - phidpOffset,)
-linearPhi = LinearPhi()
-
-class LinearPhiFixed(LinearPhi):
-    coeffs = {('C', 'H') : 0.08, ('C', 'diff') : 0.02, ('X', 'H') : 0.233,
-            ('X', 'diff') : 0.033}
-linearPhiFixed = LinearPhiFixed()

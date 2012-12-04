@@ -1,3 +1,3 @@
-from .algorithms import zphi, linear, attenRegistry
+from .algorithms import zphi, linear, attenAlgs
 
-__all__ = ['zphi', 'linear', 'attenRegistry']
+__all__ = ['zphi', 'linear', 'attenAlgs']
