@@ -131,6 +131,12 @@ class ModelData(NetCDFData):
 # Make a base for moment info from a named tuple
 class MomentInfo_(namedtuple('MomentInfo', ['type', 'pol', 'source'])):
     def __str__(self):
+        name, src_str = self.string_parts()
+        if src_str:
+            name += ' (%s)' % self.source.capitalize()
+        return name
+
+    def string_parts(self):
         abbr = self.type.abbr
         if self.pol:
             abbr = abbr.replace('$', '')
@@ -145,9 +151,9 @@ class MomentInfo_(namedtuple('MomentInfo', ['type', 'pol', 'source'])):
             name = abbr
 
         if self.source:
-            return name + ' (%s)' % self.source.capitalize()
+            return name, self.source
         else:
-            return name
+            return name, ''
 
 MIDefault = MomentInfo_(*([None] * len(MomentInfo_._fields)))
 

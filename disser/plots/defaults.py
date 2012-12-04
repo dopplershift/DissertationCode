@@ -2,6 +2,7 @@ import numpy as np
 from matplotlib import rcParams
 from functools import partial, wraps
 from itertools import cycle
+from contextlib import contextmanager
 import quantities as pq
 pq.markup.format_units_latex = partial(pq.markup.format_units_latex,
     font='mathsf')
@@ -45,8 +46,8 @@ datatypes.TypePlotInfo[datatypes.SpectrumWidth].update(
 datatypes.TypePlotInfo[datatypes.Power].update(norm=plt.Normalize(-115, -25))
 datatypes.TypePlotInfo[datatypes.ZDR].update(norm=plt.Normalize(-5, 5))
 
-_phiNorms = wavelengthNorm(X=plt.Normalize(-150, 100),
-        C=plt.Normalize(-150, 50), S=plt.normalize(-150, -75))
+_phiNorms = wavelengthNorm(X=plt.Normalize(0, 250),
+        C=plt.Normalize(0, 200), S=plt.normalize(0, 75))
 datatypes.TypePlotInfo[datatypes.PhiDP].update(norm=_phiNorms)
 
 _kdpNorms = wavelengthNorm(X=plt.Normalize(-5, 25), C=plt.Normalize(-5, 15),
@@ -102,11 +103,41 @@ def default_ppi_axis(grid):
 
 axisDefaults.setup = default_ppi_axis
 
+def defaultColorbarLabels(dt, units):
+    return units if units != 'dimensionless' else ''
+
+def sourceLabels(dt, units):
+    return '%s (%s)' % (dt, units)
+
+def algLabels(dt, units):
+    abbr, src_str = dt.string_parts()
+    return '%s from %s (%s)' % (abbr, src_str, units)
+
+class ColorbarLabeller(object):
+    def __init__(self):
+        self.label = defaultColorbarLabels
+
+    @contextmanager
+    def __call__(self, new_label):
+        try:
+            # This way we ensure we aren't being nested
+            if self.label == defaultColorbarLabels:
+                saved = self.label
+                self.label = new_label
+            else:
+                saved = None
+            yield
+        finally:
+            if saved:
+                self.label = saved
+colorbarLabeller = ColorbarLabeller()
+
 # Helper for labelling the colorbar
-def setup_cbar(cax, colorartist, units, pad=4):
+def setup_cbar(cax, colorartist, datatype, units, pad=4):
     cbar = cax.colorbar(colorartist)
-    if units and units != 'dimensionless':
-        cbar.set_label_text(units)
+    label = colorbarLabeller.label(datatype, units)
+    if label:
+        cbar.set_label_text(label)
     cbar.cbar_axis.labelpad = pad
 
 # Helper to turn a data object into a sequence if necessary
@@ -131,7 +162,7 @@ def multipanel_cbar_column(fig, layout, moments, data, rect=(1, 1, 1)):
         panel_label.patch.set_boxstyle("round, pad=0., rounding_size=0.2")
         ax.add_artist(panel_label)
         ax.set_title(m)
-        setup_cbar(cax, ppi.mesh, d.fields[m].dimensionality)
+        setup_cbar(cax, ppi.mesh, m, d.fields[m].dimensionality)
 
     return grid
 
@@ -148,8 +179,9 @@ def multipanel_cbar_row(fig, layout, moments, data, rect=(1, 1, 1)):
         ppi = PPIPlot(d.fields, var=m, ax=ax, rings=rings)
         panel_label.patch.set_boxstyle("round, pad=0., rounding_size=0.2")
         ax.add_artist(panel_label)
-        setup_cbar(cax, ppi.mesh, '%s (%s)' % (m,
-            d.fields[m].dimensionality))
+        # Hack to Keep old behavior
+        with colorbarLabeller(sourceLabels):
+            setup_cbar(cax, ppi.mesh, m, d.fields[m].dimensionality)
 
     return grid
 
@@ -166,6 +198,6 @@ def multipanel_cbar_each(fig, layout, moments, data, rect=(1, 1, 1)):
         panel_label.patch.set_boxstyle("round, pad=0., rounding_size=0.2")
         ax.add_artist(panel_label)
         ax.set_title(m)
-        setup_cbar(cax, ppi.mesh, d.fields[m].dimensionality)
+        setup_cbar(cax, ppi.mesh, m, d.fields[m].dimensionality)
 
     return grid
