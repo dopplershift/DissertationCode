@@ -28,6 +28,7 @@ class PlotInfoContext(object):
         return plotInfoAttrs
 
     def __exit__(self, type, value, tb):
+        plotInfoAttrs.clear()
         plotInfoAttrs.update(self._old_settings)
 
 # Used to contain default information for plotting data types.
