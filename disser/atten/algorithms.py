@@ -75,10 +75,13 @@ def I0(z, dr, b):
     return db_conv * b * np.trapz(10 ** ((b / 10.) * z), dx=dr)
 
 
-bringi_coeffs = {('C', 'H') : 0.08, ('C', 'diff') : 0.02, ('X', 'H') : 0.233,
-        ('X', 'diff') : 0.033}
+# These come from the Bring et al. (1990) paper that originally introduced
+# the linear relation between attenuation and phi.
+bringi_coeffs = {('S', 'H') : 0.016, ('S', 'diff') : 0.00367,
+        ('C', 'H') : 0.054, ('C', 'diff') : 0.0157,
+        ('X', 'H') : 0.25, ('X', 'diff') : 0.05}
 
-@attenAlgs.register('LinearBringi', [datatypes.PhiDP], ('H', 'diff'), bringi_coeffs)
+@attenAlgs.register('Linear-Bringi', [datatypes.PhiDP], ('H', 'diff'), bringi_coeffs)
 @attenAlgs.register('Linear', [datatypes.PhiDP], ('H', 'diff'), ka_coeffs)
 def linear(phi, coeff=0.08):
     try:
