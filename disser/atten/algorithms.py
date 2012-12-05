@@ -48,9 +48,21 @@ class AttenuationAlgorithm(object):
         return atten
 
 
+zphi_coeffs = {k:(v[1], ka_coeffs[k]) for k,v in za_coeffs.items()}
+
+@attenAlgs.register('ZPHI',
+        [datatypes.SNR, datatypes.Reflectivity, datatypes.PhiDP],
+        ('H', 'V'), zphi_coeffs, dr=lambda d: d.gate_length)
+def zphi(snr, z, phi, b, gamma, dr):
+    atten = np.zeros_like(z)
+    for ray in range(atten.shape[0]):
+        delta_phi = phi[ray, -1] - phi[ray, 0]
+        atten[ray] = zphi_atten(z[ray], dr, delta_phi, b, gamma)
+    return atten
+
 # This is the main calculation, as outlined in equation (24) in the Testud
 # et al. (2000) paper
-def zphi(z, dr, delta_phi, b=0.7644, gamma=3.2e-1):
+def zphi_atten(z, dr, delta_phi, b=0.7644, gamma=3.2e-1):
     phi_factor = np.expm1(np.log(10) * b * gamma * delta_phi / 10.)
     return phi_factor * 10**((b / 10.) * z) / (I0(z, dr, b)
             + phi_factor * I(z, dr, b))
