@@ -85,6 +85,7 @@ def getBestAlg(datatype, availTypes, unavailTypes=None):
 
 
 Power = DataType(name='Power', abbr='$P_r$')
+SNR = DataType(name='Signal to Noise Ratio', abbr='SNR')
 Reflectivity = DataType(name='Reflectivity', abbr='Z')
 DopplerVelocity = DataType(name='Doppler Velocity', abbr=r'$V_r$')
 SpectrumWidth = DataType(name='Spectrum Width', abbr=r'$\sigma_v$')

@@ -300,6 +300,10 @@ class NetCDFRadarData(NetCDFData):
             + 1.0j * self.nc.variables['Q_%s' % pol][:])
         pwr_ts, vel_ts, spw_ts = auto_moments(self['iq_' + pol], self.nyquist)
         pwr_ts = pq.watt * pwr_ts
+        self['snr_ts_' + pol] = units.make_dB((pwr_ts - self.noise_pwr * pq.watt)
+                / self.noise_pwr * pq.watt)
+        self.fields[MomentInfo(datatypes.SNR, pol=pol,
+            source='ts')] = self['snr_ts_' + pol]
         pwr_ts_dbm = units.to_dBm(pwr_ts)
         self['pwr_ts_' + pol] = pwr_ts
         self['pwr_ts_%s_dbm' % pol] = pwr_ts_dbm
