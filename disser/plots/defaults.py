@@ -174,13 +174,13 @@ def multipanel_cbar_row(fig, layout, moments, data, rect=(1, 1, 1)):
         cbar_location='right', cbar_pad=0.15, cbar_size='10%')
 
     data = make_data_iterator(data)
-    for d, m, ax, cax, panel_label in zip(data, moments, grid,
-            grid.cbar_axes, LabelGenerator('a')):
-        ppi = PPIPlot(d.fields, var=m, ax=ax, rings=rings)
-        panel_label.patch.set_boxstyle("round, pad=0., rounding_size=0.2")
-        ax.add_artist(panel_label)
-        # Hack to Keep old behavior
-        with colorbarLabeller(sourceLabels):
+    # Hack to Keep old behavior
+    with colorbarLabeller(sourceLabels):
+        for d, m, ax, cax, panel_label in zip(data, moments, grid,
+                grid.cbar_axes, LabelGenerator('a')):
+            ppi = PPIPlot(d.fields, var=m, ax=ax, rings=rings)
+            panel_label.patch.set_boxstyle("round, pad=0., rounding_size=0.2")
+            ax.add_artist(panel_label)
             setup_cbar(cax, ppi.mesh, m, d.fields[m].dimensionality)
 
     return grid
