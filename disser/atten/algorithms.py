@@ -11,9 +11,9 @@ class AttenuationRegistry(PluginRegistry):
     def runAll(self, data, var):
         for alg in self:
             alg(data, var)
-    def register(self, name, dt, kinds, coeffs):
+    def register(self, name, dt, kinds, coeffs, **kwargs):
         def wrapper(func):
-            alg = AttenuationAlgorithm(name, func, dt, kinds, coeffs)
+            alg = AttenuationAlgorithm(name, func, dt, kinds, coeffs, **kwargs)
             PluginRegistry.register(self, alg)
             return func
         return wrapper
@@ -24,19 +24,25 @@ class AttenuationAlgorithm(object):
                 'V':(datatypes.Attenuation, 'V'),
                 'diff':(datatypes.DiffAtten, None)}
 
-    def __init__(self, name, alg, dt, kinds, coeffs):
+    def __init__(self, name, alg, dt, kinds, coeffs, **kwargs):
         self.name = name
         self.alg = alg
         self.dt = dt
         self.kinds = kinds
         self.coeffs = coeffs
+        self.data_args = kwargs
 
     def __call__(self, data, var='H'):
         # TODO: Need to handle automatically calculation of diffAtten from
         # H and V, if necessary
+        kwargs = {k:f(data) for k,f in self.data_args.items()}
         coeffs = self.coeffs[data.waveBand, var]
+        if len(coeffs) == 1:
+            coeffs = [coeffs]
+        else:
+            coeffs = list(coeffs)
         args = [data.fields.grabData(f, pol=var) for f in self.dt]
-        atten = self.alg(*(args + [coeffs]))
+        atten = self.alg(*(args + coeffs), **kwargs)
         dt, pol = self.typeInfo[var]
         data.addField(atten, dt, pol=pol, source=self.name)
         return atten
