@@ -4,7 +4,7 @@ import quantities as pq
 
 from .. import datatypes
 from ..plugintools import PluginRegistry
-from ..units import dB
+from ..units import dB, dBz
 from fit_coeffs import za_coeffs, ka_coeffs, sc_coeffs
 
 class AttenuationRegistry(PluginRegistry):
@@ -54,11 +54,31 @@ zphi_coeffs = {k:(v[1], ka_coeffs[k]) for k,v in za_coeffs.items()}
         [datatypes.SNR, datatypes.Reflectivity, datatypes.PhiDP],
         ('H', 'V'), zphi_coeffs, dr=lambda d: d.gate_length)
 def zphi(snr, z, phi, b, gamma, dr):
+    #b = pq.Quantity(b, units=1./dBz)
+    #gamma = pq.Quantity(gamma, units=dB / pq.degrees)
+    z = z.rescale(dBz).magnitude
+    snr = snr.rescale(dB).magnitude
+    phi = phi.rescale(pq.degree).magnitude
+    dr = dr.rescale(pq.kilometer).magnitude
     atten = np.zeros_like(z)
     for ray in range(atten.shape[0]):
-        delta_phi = phi[ray, -1] - phi[ray, 0]
-        atten[ray] = zphi_atten(z[ray], dr, delta_phi, b, gamma)
-    return atten
+        #good_snr = np.argwhere(snr[ray] > 1.0)
+        #if not good_snr.size > 0:
+            #continue
+        #begin = good_snr[0]
+        #end = good_snr[-1]
+        #if end < phi.shape[-1] - 1:
+            #end += 1
+        mask = ~((np.isnan(phi[ray])) | (snr[ray] < 10.0))
+        if not np.any(mask):
+            continue
+
+        delta_phi = phi[ray, mask][-1] - phi[ray, mask][0]
+        atten[ray, mask] = zphi_atten(z[ray, mask], dr, delta_phi,
+                b, gamma)
+        atten[ray] = (2 * dr * atten[ray]).cumsum()
+    atten[np.isnan(z)] = np.nan
+    return atten * dB
 
 # This is the main calculation, as outlined in equation (24) in the Testud
 # et al. (2000) paper
