@@ -36,13 +36,19 @@ class AttenuationAlgorithm(object):
         # TODO: Need to handle automatically calculation of diffAtten from
         # H and V, if necessary
         kwargs = {k:f(data) for k,f in self.data_args.items()}
-        coeffs = self.coeffs[data.waveBand, var]
-        if len(coeffs) == 1:
-            coeffs = [coeffs]
+
+        if var == 'diff' and var not in self.kinds:
+            atten_h = self.__call__(data, var='H')
+            atten_v = self.__call__(data, var='V')
+            atten = atten_h - atten_v
         else:
-            coeffs = list(coeffs)
-        args = [data.fields.grabData(f, pol=var) for f in self.dt]
-        atten = self.alg(*(args + coeffs), **kwargs)
+            coeffs = self.coeffs[data.waveBand, var]
+            try:
+                coeffs = list(coeffs)
+            except TypeError:
+                coeffs = [coeffs]
+            args = [data.fields.grabData(f, pol=var) for f in self.dt]
+            atten = self.alg(*(args + coeffs), **kwargs)
         dt, pol = self.typeInfo[var]
         data.addField(atten, dt, pol=pol, source=self.name)
         return atten
