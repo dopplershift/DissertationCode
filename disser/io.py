@@ -45,9 +45,10 @@ class FieldStore(dict):
     def grabAll(self, datatype, filt=None, **keys):
         if filt is None:
             filt = lambda k: True
-        keys.update(self.default_keys)
+        allKeys = self.default_keys.copy()
+        allKeys.update(keys)
         potential = [k for k in self.keys() if k[0] is datatype]
-        return filter(filt, sorted(potential, key=self.sorter(**keys)))
+        return filter(filt, sorted(potential, key=self.sorter(**allKeys)))
 
     def grab(self, datatype, filt=None, **keys):
         return self.grabAll(datatype, filt, **keys)[-1]
