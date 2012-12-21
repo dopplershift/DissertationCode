@@ -28,14 +28,14 @@ class PPIPlot(Plot):
 
         vals = data[var].magnitude
         vals = np.ma.array(vals, mask=np.isnan(vals))
-        self.mesh = ax.pcolormesh(data[x], data[y], vals, cmap=cmap,
+        self.mesh = self._ax.pcolormesh(data[x], data[y], vals, cmap=cmap,
             norm=norm)
 
         self._ring_patches = []
         for rng in rings:
             c = Circle(xy=(0, 0), radius=rng, fill=False)
-            ax.add_patch(c)
+            self._ax.add_patch(c)
             self._ring_patches.append(c)
 
-        ax.set_xlabel('X (%s)' % data[x].dimensionality.latex)
-        ax.set_ylabel('Y (%s)' % data[y].dimensionality.latex)
+        self._ax.set_xlabel('X (%s)' % data[x].dimensionality.latex)
+        self._ax.set_ylabel('Y (%s)' % data[y].dimensionality.latex)
