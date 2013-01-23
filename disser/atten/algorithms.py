@@ -1,5 +1,6 @@
 import numpy as np
 import scipy.integrate as si
+import scipy.optimize as so
 import quantities as pq
 
 from .. import datatypes
@@ -53,8 +54,61 @@ class AttenuationAlgorithm(object):
         data.addField(atten, dt, pol=pol, source=self.name)
         return atten
 
-
 zphi_coeffs = {k:(v[1], ka_coeffs[k]) for k,v in za_coeffs.items()}
+
+@attenAlgs.register('SC',
+        [datatypes.SNR, datatypes.Reflectivity, datatypes.PhiDP],
+        ('H', 'V'), zphi_coeffs, dr=lambda d: d.gate_length)
+def self_consistent(snr, z, phi, b, gamma, dr):
+    #b = pq.Quantity(b, units=1./dBz)
+    #gamma = pq.Quantity(gamma, units=dB / pq.degrees)
+    z = z.rescale(dBz).magnitude
+    snr = snr.rescale(dB).magnitude
+    phi = phi.rescale(pq.degree).magnitude
+    dr = dr.rescale(pq.kilometer).magnitude
+    atten = np.zeros_like(z)
+    for ray in range(atten.shape[0]):
+        #good_snr = np.argwhere(snr[ray] > 1.0)
+        #if not good_snr.size > 0:
+            #continue
+        #begin = good_snr[0]
+        #end = good_snr[-1]
+        #if end < phi.shape[-1] - 1:
+            #end += 1
+        mask = ~((np.isnan(phi[ray])) | (snr[ray] < 10.0))
+        if not np.any(mask):
+            continue
+
+        delta_phi = phi[ray, mask][-1] - phi[ray, mask][0]
+        try:
+            atten[ray, mask] = tuned_zphi(z[ray, mask], phi[ray, mask], dr,
+                    delta_phi, b, gamma)
+            atten[ray] = (2 * dr * atten[ray]).cumsum()
+        except RuntimeError:
+            print "Minimizer failed on ray: %d" % ray
+            atten[ray] = np.nan
+    atten[np.isnan(z)] = np.nan
+    return atten * dB
+
+def zphi_error(gamma, z, phi, dr, delta_phi, b):
+    A = zphi_atten(z, dr, delta_phi, b, gamma)
+    phi_calc = (2. / gamma) * si.cumtrapz(A, dx=dr, initial=0)
+    return np.abs(phi - phi_calc).mean()
+
+def tuned_zphi(z, phi, dr, delta_phi, b=0.7644, gamma_default=0.1):
+    gamma_min = 0.01 * gamma_default
+    gamma_max = 10 * gamma_default
+    ret = so.minimize_scalar(zphi_error, bounds=(gamma_min, gamma_max),
+                             args=(z, phi, dr, delta_phi, b), method='Bounded')
+    if ret.success:
+        gamma = ret.x
+        #print ret.message
+    else:
+        raise RuntimeError(ret.message)
+        gamma = gamma_default
+    #print 'Running zphi with gamma: %f' % gamma
+    return zphi_atten(z, dr, delta_phi, b, gamma)
+
 
 @attenAlgs.register('ZPHI',
         [datatypes.SNR, datatypes.Reflectivity, datatypes.PhiDP],
