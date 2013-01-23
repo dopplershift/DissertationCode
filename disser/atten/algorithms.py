@@ -9,6 +9,11 @@ from ..units import dB, dBz
 from fit_coeffs import za_coeffs, ka_coeffs, sc_coeffs
 
 class AttenuationRegistry(PluginRegistry):
+    def __init__(self):
+        super(AttenuationRegistry, self).__init__()
+        self.nameLookup = dict()
+    def run(self, algName, data, var):
+        self.nameLookup[algName](data, var)
     def runAll(self, data, var):
         for alg in self:
             alg(data, var)
@@ -16,6 +21,7 @@ class AttenuationRegistry(PluginRegistry):
         def wrapper(func):
             alg = AttenuationAlgorithm(name, func, dt, kinds, coeffs, **kwargs)
             PluginRegistry.register(self, alg)
+            self.nameLookup[name] = alg
             return func
         return wrapper
 attenAlgs = AttenuationRegistry()
