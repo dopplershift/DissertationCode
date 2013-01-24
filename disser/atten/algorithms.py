@@ -81,20 +81,35 @@ def self_consistent(snr, z, phi, b, gamma, dr):
         #end = good_snr[-1]
         #if end < phi.shape[-1] - 1:
             #end += 1
-        mask = ~((np.isnan(phi[ray])) | (snr[ray] < 10.0))
+        mask = ~(np.isnan(phi[ray]) | (snr[ray] < 3.))
         if not np.any(mask):
             continue
 
         delta_phi = phi[ray, mask][-1] - phi[ray, mask][0]
         try:
-            atten[ray, mask] = tuned_zphi(z[ray, mask], phi[ray, mask], dr,
-                    delta_phi, b, gamma)
+            atten[ray, mask] = tuned_zphi(z[ray, mask],
+                    running_mean(phi[ray, mask], 4), dr, delta_phi, b, gamma)
             atten[ray] = (2 * dr * atten[ray]).cumsum()
         except RuntimeError:
             print "Minimizer failed on ray: %d" % ray
             atten[ray] = np.nan
+    atten[snr < 10.0] = np.nan
     atten[np.isnan(z)] = np.nan
     return atten * dB
+
+def running_mean(data, halfWidth):
+    numPoints = 2 * halfWidth + 1
+    # Pad the boundaries with nans so we don't need special handling
+    tempData = np.concatenate([[np.nan] * halfWidth, data,
+            [np.nan] * halfWidth])
+
+    # Play with strides so that we can easily get the moving window
+    tempData = np.lib.stride_tricks.as_strided(tempData,
+            (data.size, numPoints), (tempData.itemsize, tempData.itemsize))
+
+    # Mean accounting for nans is the nansum() divided by number of
+    # non-nan items
+    return np.nansum(tempData, axis=1) / np.sum(~np.isnan(tempData), axis = 1)
 
 def zphi_error(gamma, z, phi, dr, delta_phi, b):
     A = zphi_atten(z, dr, delta_phi, b, gamma)
