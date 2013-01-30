@@ -139,14 +139,16 @@ def tuned_zphi(z, phi, dr, delta_phi, b=0.7644, gamma_default=0.1):
 
 @attenAlgs.register('ZPHI',
         [datatypes.SNR, datatypes.Reflectivity, datatypes.PhiDP],
-        ('H', 'V'), zphi_coeffs, dr=lambda d: d.gate_length)
-def zphi(snr, z, phi, b, gamma, dr):
+        ('H', 'V'), zphi_coeffs, dr=lambda d: d.gate_length,
+        phi0=lambda d: d.phi_offset)
+def zphi(snr, z, phi, b, gamma, dr, phi0):
     #b = pq.Quantity(b, units=1./dBz)
     #gamma = pq.Quantity(gamma, units=dB / pq.degrees)
     z = z.rescale(dBz).magnitude
     snr = snr.rescale(dB).magnitude
     phi = phi.rescale(pq.degree).magnitude
     dr = dr.rescale(pq.kilometer).magnitude
+    phi0 = phi0.rescale(pq.degrees).magnitude
     atten = np.zeros_like(z)
     for ray in range(atten.shape[0]):
         #good_snr = np.argwhere(snr[ray] > 1.0)
@@ -156,15 +158,17 @@ def zphi(snr, z, phi, b, gamma, dr):
         #end = good_snr[-1]
         #if end < phi.shape[-1] - 1:
             #end += 1
-        mask = ~((np.isnan(phi[ray])) | (snr[ray] < 10.0))
+        mask = (~np.isnan(phi[ray])) & (snr[ray] > 0.0)
         if not np.any(mask):
             continue
 
-        delta_phi = phi[ray, mask][-1] - phi[ray, mask][0]
+        smooth_phi = running_mean(phi[ray, mask], int(1.5 / dr))
+        delta_phi = smooth_phi[-1] - phi0
         atten[ray, mask] = zphi_atten(z[ray, mask], dr, delta_phi,
                 b, gamma)
         atten[ray] = (2 * dr * atten[ray]).cumsum()
-    atten[np.isnan(z)] = np.nan
+    atten[snr < 0.0] = np.nan
+    atten[np.isnan(snr)] = np.nan
     return atten * dB
 
 # This is the main calculation, as outlined in equation (24) in the Testud
