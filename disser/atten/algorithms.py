@@ -83,20 +83,24 @@ def self_consistent(snr, z, phi, b, gamma, dr, phi0):
         #end = good_snr[-1]
         #if end < phi.shape[-1] - 1:
             #end += 1
-        mask = ~(np.isnan(phi[ray]) | (snr[ray] < 3.))
+        mask = (~np.isnan(phi[ray])) & (snr[ray] > 0.)
         if not np.any(mask):
             continue
 
-        delta_phi = phi[ray, mask][-1] - phi0
+        # Use a 1.5 km half-width for smoothing. Use the gatewidth to
+        # convert this to a number of bins.
+        smooth_phi = running_mean(phi[ray, mask], int(1.5 / dr))
+        delta_phi = smooth_phi[-1] - phi0
         try:
             atten[ray, mask] = tuned_zphi(z[ray, mask],
-                    running_mean(phi[ray, mask], 4), dr, delta_phi, b, gamma)
+                    running_mean(phi[ray, mask], int(1.0 / dr)), dr,
+                    delta_phi, b, gamma)
             atten[ray] = (2 * dr * atten[ray]).cumsum()
         except RuntimeError:
             print "Minimizer failed on ray: %d" % ray
             atten[ray] = np.nan
-    atten[snr < 10.0] = np.nan
-    atten[np.isnan(z)] = np.nan
+    atten[snr < 0.0] = np.nan
+    atten[np.isnan(snr)] = np.nan
     return atten * dB
 
 def running_mean(data, halfWidth):
