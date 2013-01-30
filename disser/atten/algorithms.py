@@ -64,14 +64,16 @@ zphi_coeffs = {k:(v[1], ka_coeffs[k]) for k,v in za_coeffs.items()}
 
 @attenAlgs.register('SC',
         [datatypes.SNR, datatypes.Reflectivity, datatypes.PhiDP],
-        ('H', 'V'), zphi_coeffs, dr=lambda d: d.gate_length)
-def self_consistent(snr, z, phi, b, gamma, dr):
+        ('H', 'V'), zphi_coeffs, dr=lambda d: d.gate_length,
+        phi0=lambda d: d.phi_offset)
+def self_consistent(snr, z, phi, b, gamma, dr, phi0):
     #b = pq.Quantity(b, units=1./dBz)
     #gamma = pq.Quantity(gamma, units=dB / pq.degrees)
     z = z.rescale(dBz).magnitude
     snr = snr.rescale(dB).magnitude
     phi = phi.rescale(pq.degree).magnitude
     dr = dr.rescale(pq.kilometer).magnitude
+    phi0 = phi0.rescale(pq.degree).magnitude
     atten = np.zeros_like(z)
     for ray in range(atten.shape[0]):
         #good_snr = np.argwhere(snr[ray] > 1.0)
@@ -85,7 +87,7 @@ def self_consistent(snr, z, phi, b, gamma, dr):
         if not np.any(mask):
             continue
 
-        delta_phi = phi[ray, mask][-1] - phi[ray, mask][0]
+        delta_phi = phi[ray, mask][-1] - phi0
         try:
             atten[ray, mask] = tuned_zphi(z[ray, mask],
                     running_mean(phi[ray, mask], 4), dr, delta_phi, b, gamma)
