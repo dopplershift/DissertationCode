@@ -6,14 +6,19 @@ import quantities as pq
 from .. import datatypes
 from ..plugintools import PluginRegistry
 from ..units import dB, dBz
+from ..cbook import is_string_like
 from fit_coeffs import za_coeffs, ka_coeffs, sc_coeffs
 
 class AttenuationRegistry(PluginRegistry):
     def __init__(self):
         super(AttenuationRegistry, self).__init__()
         self.nameLookup = dict()
-    def run(self, algName, data, var):
-        self.nameLookup[algName](data, var)
+    def run(self, algs, data, var):
+        if is_string_like(algs):
+            self.nameLookup[algs](data, var)
+        else:
+            for alg in algs:
+                self.nameLookup[alg](data, var)
     def runAll(self, data, var):
         for alg in self:
             alg(data, var)
