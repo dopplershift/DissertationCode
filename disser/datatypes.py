@@ -104,3 +104,11 @@ DiffAtten = DataType(name='Differential Attenuation', abbr=r'$A_D$')
 SpecAttenuation = DataType(name='Specific Attenuation', abbr=r'$\alpha$')
 SpecDiffAtten = DataType(name='Specific Differential Attenuation',
         abbr=r'$\alpha_D$')
+
+AttenDelta = DataType('Attenuation Difference', r'$\Delta A$')
+SpecAttenDelta = DataType('Specific Attenuation Difference',
+    r'$\Delta \alpha$')
+DiffAttenDelta = DataType('Differential Attenuation Difference', r'$\Delta A_D$')
+SpecDiffAttenDelta = DataType('Specific Differential Attenuation Difference',
+    r'$\Delta \alpha_D$')
+PhiDelta = DataType('Differential Phase Difference', r'$\Delta \Phi_{DP}$')
