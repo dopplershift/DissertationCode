@@ -167,12 +167,14 @@ def multipanel_cbar_column(fig, layout, moments, data, rect=(1, 1, 1)):
         share_all=True, axes_pad=0.45, aspect=True, cbar_mode='edge',
         cbar_location='bottom', cbar_pad=0.55, cbar_size='10%')
 
+    use_labels = layout != (1,1)
     data = make_data_iterator(data)
     for d, m, ax, cax, panel_label in zip(data, moments, grid,
             grid.cbar_axes, LabelGenerator('a')):
         ppi = PPIPlot(d.fields, var=m, ax=ax, rings=rings)
-        panel_label.patch.set_boxstyle("round, pad=0., rounding_size=0.2")
-        ax.add_artist(panel_label)
+        if use_labels:
+            panel_label.patch.set_boxstyle("round, pad=0., rounding_size=0.2")
+            ax.add_artist(panel_label)
         ax.set_title(m)
         setup_cbar(cax, ppi.mesh, m, d.fields[m].dimensionality)
 
@@ -185,14 +187,17 @@ def multipanel_cbar_row(fig, layout, moments, data, rect=(1, 1, 1)):
         share_all=True, axes_pad=0.15, aspect=True, cbar_mode='edge',
         cbar_location='right', cbar_pad=0.15, cbar_size='10%')
 
+    use_labels = layout != (1,1)
     data = make_data_iterator(data)
     # Hack to Keep old behavior
     with colorbarLabeller(sourceLabels):
         for d, m, ax, cax, panel_label in zip(data, moments, grid,
                 grid.cbar_axes, LabelGenerator('a')):
             ppi = PPIPlot(d.fields, var=m, ax=ax, rings=rings)
-            panel_label.patch.set_boxstyle("round, pad=0., rounding_size=0.2")
-            ax.add_artist(panel_label)
+            if use_labels:
+                panel_label.patch.set_boxstyle(
+                        "round, pad=0., rounding_size=0.2")
+                ax.add_artist(panel_label)
             setup_cbar(cax, ppi.mesh, m, d.fields[m].dimensionality)
 
     return grid
@@ -203,12 +208,14 @@ def multipanel_cbar_each(fig, layout, moments, data, rect=(1, 1, 1)):
         share_all=True, axes_pad=0.50, aspect=True, cbar_mode='each',
         cbar_location='right', cbar_pad=0.15, cbar_size='10%')
 
+    use_labels = layout != (1,1)
     data = make_data_iterator(data)
     for d, m, ax, cax, panel_label in zip(data, moments, grid,
             grid.cbar_axes, LabelGenerator('a')):
         ppi = PPIPlot(d.fields, var=m, ax=ax, rings=rings)
-        panel_label.patch.set_boxstyle("round, pad=0., rounding_size=0.2")
-        ax.add_artist(panel_label)
+        if use_labels:
+            panel_label.patch.set_boxstyle("round, pad=0., rounding_size=0.2")
+            ax.add_artist(panel_label)
         ax.set_title(m)
         setup_cbar(cax, ppi.mesh, m, d.fields[m].dimensionality)
 
