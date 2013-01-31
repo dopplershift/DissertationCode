@@ -67,8 +67,8 @@ _specAttenNorms = wavelengthNorm(X=plt.Normalize(0, 8), C=plt.Normalize(0, 2),
         S=plt.Normalize(0, 0.25))
 datatypes.TypePlotInfo[datatypes.SpecAttenuation].update(norm=_specAttenNorms)
 
-_specDANorms = wavelengthNorm(X=plt.Normalize(0, 1.0), C=plt.Normalize(0, 0.5),
-        S=plt.Normalize(0, 0.1))
+_specDANorms = wavelengthNorm(X=plt.Normalize(0, 1.0),
+        C=plt.Normalize(0, 0.75), S=plt.Normalize(0, 0.1))
 datatypes.TypePlotInfo[datatypes.SpecDiffAtten].update(norm=_specDANorms)
 
 # Set up some rcParams for figures
