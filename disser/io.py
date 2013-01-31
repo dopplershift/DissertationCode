@@ -134,7 +134,10 @@ class MomentInfo_(namedtuple('MomentInfo', ['type', 'pol', 'source'])):
     def __str__(self):
         name, src_str = self.string_parts()
         if src_str:
-            name += ' (%s)' % self.source.capitalize()
+            src = self.source
+            if not src.isupper():
+                src = src.capitalize()
+            name += ' (%s)' % src
         return name
 
     def string_parts(self):
