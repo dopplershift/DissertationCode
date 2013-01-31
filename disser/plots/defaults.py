@@ -71,6 +71,18 @@ _specDANorms = wavelengthNorm(X=plt.Normalize(0, 1.0),
         C=plt.Normalize(0, 0.75), S=plt.Normalize(0, 0.1))
 datatypes.TypePlotInfo[datatypes.SpecDiffAtten].update(norm=_specDANorms)
 
+bidi_cmap = get_cmap('Carbone42')
+datatypes.TypePlotInfo[datatypes.AttenDelta].update(
+        norm=plt.Normalize(-10, 10), cmap=bidi_cmap)
+datatypes.TypePlotInfo[datatypes.SpecAttenDelta].update(
+        norm=plt.Normalize(-1, 1), cmap=bidi_cmap)
+datatypes.TypePlotInfo[datatypes.DiffAttenDelta].update(
+        norm=plt.Normalize(-2, 2), cmap=bidi_cmap)
+datatypes.TypePlotInfo[datatypes.SpecDiffAttenDelta].update(
+        norm=plt.Normalize(-0.5, 0.5), cmap=bidi_cmap)
+datatypes.TypePlotInfo[datatypes.PhiDelta].update(norm=plt.Normalize(-50, 50),
+        cmap=bidi_cmap)
+
 # Set up some rcParams for figures
 rcParams['savefig.dpi'] = 150
 rcParams['font.size'] = 8
