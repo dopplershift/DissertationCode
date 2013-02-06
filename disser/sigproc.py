@@ -76,4 +76,4 @@ def dual_pol_covar1(Rhh, Rvv, Rhv1, Rhv2):
 
 def shift_phi(phi):
     from quantities import degrees
-    phi[phi < -5. * degrees] += 360 * degrees
+    phi[phi < -15. * degrees] += 360 * degrees
