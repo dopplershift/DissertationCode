@@ -88,7 +88,7 @@ def self_consistent(snr, z, phi, b, gamma, dr, phi0):
         #end = good_snr[-1]
         #if end < phi.shape[-1] - 1:
             #end += 1
-        mask = (~np.isnan(phi[ray])) & (snr[ray] > 0.)
+        mask = (~np.isnan(phi[ray])) & (snr[ray] > 20.)
         if not np.any(mask):
             continue
 
@@ -163,7 +163,7 @@ def zphi(snr, z, phi, b, gamma, dr, phi0):
         #end = good_snr[-1]
         #if end < phi.shape[-1] - 1:
             #end += 1
-        mask = (~np.isnan(phi[ray])) & (snr[ray] > 0.0)
+        mask = (~np.isnan(phi[ray])) & (snr[ray] > 20.)
         if not np.any(mask):
             continue
 
