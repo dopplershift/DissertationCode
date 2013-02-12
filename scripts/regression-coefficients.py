@@ -68,6 +68,14 @@ def fit_all_attenuation(scatter, pol='H'):
         scatter.kdp]).T, atten.reshape(-1, 1), weights)
     return coeffs
 
+def fit_diff_attenuation(scatter, pol='H'):
+    atten = scatter.atten
+    diff_atten = scatter.diff_atten
+    weights = (atten * atten).reshape(-1, 1)
+    coeffs,fit = disser.tools.linear_regression(atten.reshape(-1, 1),
+            diff_atten.reshape(-1, 1), weights, intercept=False)
+    return coeffs
+
 # Model distribution parameters
 # Use subset of data with actual rain
 data = disser.io.ModelData('/home/rmay/radar_sim_git/data/commas_wz_3600.nc')
@@ -80,6 +88,7 @@ nr = data.nr[mask][::100]
 za_fit_coeffs = dict()
 ka_fit_coeffs = dict()
 sc_fit_coeffs = dict()
+ad_fit_coeffs = dict()
 lams = {10 * pq.cm : 'S', 5.5 * pq.cm : 'C', 3.21 * pq.cm : 'X'}
 temp = 10
 canting_width = 10.
@@ -98,6 +107,8 @@ for l in lams:
     sc_fit_coeffs[(lams[l], 'diff')] = fit_all_attenuation(scatter_data,
             pol='diff')
 
+    ad_fit_coeffs[lams[l]] = fit_diff_attenuation(scatter_data)
+
 with open('fit_coeffs.py', 'w') as outfile:
     from datetime import datetime
     inv_lams = dict([(band, lam) for lam,band in lams.items()])
@@ -111,4 +122,5 @@ with open('fit_coeffs.py', 'w') as outfile:
     outfile.write('za_coeffs = %s\n' % repr(za_fit_coeffs))
     outfile.write('ka_coeffs = %s\n' % repr(ka_fit_coeffs))
     outfile.write('sc_coeffs = %s\n' % repr(sc_fit_coeffs))
+    outfile.write('diff_atten_coeffs = %s\n' % repr(ad_fit_coeffs))
     outfile.write('del array, cm\n')
