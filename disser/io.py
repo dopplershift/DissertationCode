@@ -180,7 +180,7 @@ class NetCDFRadarData(NetCDFData):
             'DataFiles', 'DataType', 'DropModel', 'FixedTemp',
             'GitDate', 'GitHash', 'GitTimeStamp', 'RadarName',
             'RandomSeed', 'RunStarted', 'ScatteringModel', 'SweepType',
-            'VersionNumber', 'AxisRatioCalc']:
+            'VersionNumber', 'AxisRatioCalc', 'RadarAntennaCutoff']:
             runinfo[attr] = getattr(self.nc, attr, None)
 
         self.wavelength = self.readVar('Wavelength')[0]
