@@ -189,6 +189,8 @@ class NetCDFRadarData(NetCDFData):
         self.pulse_length = self.readVar('PulseDuration')[0] * pq.c / 2.
         self.rng = (np.arange(len(self.nc.dimensions['gates']))
             * self.gate_length + self.readVar('RangeToFirstGate'))
+        self.prt = self.readVar('PRT')
+        self.beamwidth = self.readVar('HorizontalBeamwidth')
 
         self.nyquist = self.readVar('NyquistVelocity')
         self.noise_pwr_db = self.readVar('MinimumDetectableSignal')
