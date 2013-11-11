@@ -30,6 +30,7 @@ def make_plots(fname, save_prefix=None):
         ax.xaxis.set_major_locator(plt.MultipleLocator(10))
         ax.set_ylim(0, 50)
         ax.set_xlim(-20, 20)
+        figs[-1].suptitle('%.1f cm' % data.wavelength.rescale('cm'))
 
     if save_prefix:
         for num,f in enumerate(figs):
