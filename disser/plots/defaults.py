@@ -47,11 +47,11 @@ datatypes.TypePlotInfo[datatypes.Power].update(norm=plt.Normalize(-115, -25))
 datatypes.TypePlotInfo[datatypes.ZDR].update(norm=plt.Normalize(-5, 5))
 
 _phiNorms = wavelengthNorm(X=plt.Normalize(0, 250),
-        C=plt.Normalize(0, 200), S=plt.normalize(0, 100))
+        C=plt.Normalize(0, 200), S=plt.Normalize(0, 100))
 datatypes.TypePlotInfo[datatypes.PhiDP].update(norm=_phiNorms)
 
 _kdpNorms = wavelengthNorm(X=plt.Normalize(-5, 25), C=plt.Normalize(-5, 15),
-        S=plt.normalize(-5, 5))
+        S=plt.Normalize(-5, 5))
 datatypes.TypePlotInfo[datatypes.KDP].update(norm=_kdpNorms)
 datatypes.TypePlotInfo[datatypes.RhoHV].update(norm=plt.Normalize(0.98, 1.0))
 
