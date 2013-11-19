@@ -186,6 +186,8 @@ class NetCDFRadarData(NetCDFData):
             runinfo[attr] = getattr(self.nc, attr, None)
 
         self.wavelength = self.readVar('Wavelength')[0]
+        self.radialWidth = (self.readVar('NumberPulses')[0] *
+                self.readVar('RotationRate')[0] * self.readVar('PRT')[0])
         self.az = self.readVar('Azimuth')
         self.gate_length = self.readVar('GateLength')
         self.pulse_length = self.readVar('PulseDuration')[0] * pq.c / 2.
