@@ -112,10 +112,12 @@ class NetCDFData(DataSet):
             vals = vals.filled()
 
         try:
-            return pq.Quantity(vals, var.units.replace(' ', '_'))
+            if hasattr(var, 'units'):
+                return pq.Quantity(vals, var.units.replace(' ', '_'))
         except LookupError:
             print 'Need to add support for: %s' % var.units
-            return vals
+
+        return vals
 
 
 class ModelData(NetCDFData):
