@@ -47,13 +47,13 @@ data = data_cache[('X','Control')]
 for band,exp in data_cache:
     data = data_cache[band,exp]
     fig_rect = [0.08, 0.08, 0.84, 0.84]
-    title_text = u'%s-band %s' % (data.waveBand, exp.title())
+    title_text = '%s-band %s' % (data.waveBand, exp.title())
     basename = '%s_%s.png' % (band, exp)
     with datatypes.PlotInfoContext(wavelength=data.wavelength):
         moments = [data.fields.grab(moment, pol='H', source='ts')
                        for moment in (datatypes.Reflectivity,
                            datatypes.DopplerVelocity, datatypes.SpectrumWidth)]
-        moments.append(data.fields.grab(datatypes.DiffAtten, pol='diff',
+        moments.append(data.fields.grab(datatypes.Attenuation, pol='H',
                 source='calc'))
         grid = defaults.multipanel_cbar_each(plt.figure(), (2, 2), moments,
                 data, rect=fig_rect)
