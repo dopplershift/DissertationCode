@@ -48,7 +48,7 @@ for band,exp in data_cache:
     data = data_cache[band,exp]
     fig_rect = [0.08, 0.08, 0.84, 0.84]
     title_text = '%s-band %s' % (data.waveBand, exp.title())
-    basename = '%s_%s.png' % (band, exp)
+    basename = '%s_%s.png' % (band, exp.replace(' ', ''))
     with datatypes.PlotInfoContext(wavelength=data.wavelength):
         moments = [data.fields.grab(moment, pol='H', source='ts')
                        for moment in (datatypes.Reflectivity,
