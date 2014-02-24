@@ -205,7 +205,7 @@ def multipanel_cbar_row(fig, layout, moments, data, rect=(1, 1, 1)):
 @axisDefaults
 def multipanel_cbar_each(fig, layout, moments, data, rect=(1, 1, 1)):
     grid = ImageGrid(fig, rect, nrows_ncols=layout, direction='row',
-        share_all=True, axes_pad=0.50, aspect=True, cbar_mode='each',
+        share_all=True, axes_pad=0.65, aspect=True, cbar_mode='each',
         cbar_location='right', cbar_pad=0.15, cbar_size='10%')
 
     use_labels = layout != (1,1)
