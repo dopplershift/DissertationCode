@@ -183,9 +183,20 @@ def multipanel_cbar_column(fig, layout, moments, data, rect=(1, 1, 1)):
 @axisDefaults
 def multipanel_cbar_row(fig, layout, moments, data, rect=(1, 1, 1)):
     # TODO: The params here are not tuned
+    if layout[0] == 1:
+        mode = 'single'
+        size = '1%'
+        loc = 'bottom'
+        pad = 0.35
+    else:
+        mode = 'edge'
+        size = '10%'
+        loc = 'right'
+        pad = 0.15
+
     grid = ImageGrid(fig, rect, nrows_ncols=layout, direction='column',
-        share_all=True, axes_pad=0.15, aspect=True, cbar_mode='edge',
-        cbar_location='right', cbar_pad=0.15, cbar_size='10%')
+        share_all=True, axes_pad=0.15, aspect=True, cbar_mode=mode,
+        cbar_location=loc, cbar_pad=pad, cbar_size=size)
 
     use_labels = layout != (1,1)
     data = make_data_iterator(data)
