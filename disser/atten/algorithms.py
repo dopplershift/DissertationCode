@@ -1,6 +1,7 @@
 import numpy as np
 import scipy.integrate as si
 import scipy.optimize as so
+import scipy.signal as ss
 import quantities as pq
 
 from .. import datatypes
@@ -67,6 +68,58 @@ class AttenuationAlgorithm(object):
 
 zphi_coeffs = {k:(v[1], ka_coeffs[k]) for k,v in za_coeffs.items()}
 
+@attenAlgs.register('MSC',
+        [datatypes.SNR, datatypes.Reflectivity, datatypes.PhiDP],
+        ('H', 'V'), zphi_coeffs, dr=lambda d: d.gate_length,
+        phi0=lambda d: d.phi_offset)
+def modified_self_consistent(snr, z, phi, b, gamma, dr, phi0):
+    z = z.rescale(dBz).magnitude
+    snr = snr.rescale(dB).magnitude
+    phi = phi.rescale(pq.degree).magnitude
+    dr = dr.rescale(pq.kilometer).magnitude
+    phi0 = phi0.rescale(pq.degree).magnitude
+    atten = np.zeros_like(z)
+    gammas = list()
+    for ray in range(atten.shape[0]):
+        mask = (~np.isnan(phi[ray])) & (snr[ray] > 20.)
+        if not np.any(mask):
+            gammas.append(np.nan)
+            continue
+
+        # Use a 1.5 km half-width for smoothing. Use the gatewidth to
+        # convert this to a number of bins.
+        smooth_phi = running_mean(phi[ray, mask], int(1.5 / dr))
+        delta_phi = smooth_phi[-1] - phi0
+        try:
+            g = tuned_zphi(z[ray, mask],
+                    running_mean(phi[ray, mask], int(1.0 / dr)), dr,
+                    delta_phi, b, gamma)
+            gammas.append(g)
+        except RuntimeError:
+            print "Minimizer failed on ray: %d" % ray
+
+    # Store the fit gammas for access externally if desired
+    gammas = np.array(gammas)
+    opt_gamma = np.median(gammas[~np.isnan(gammas)])
+    modified_self_consistent.gammas = gammas
+
+    for ray in range(atten.shape[0]):
+        mask = (~np.isnan(phi[ray])) & (snr[ray] > 20.)
+        if not np.any(mask):
+            continue
+
+        # Use a 1.5 km half-width for smoothing. Use the gatewidth to
+        # convert this to a number of bins.
+        smooth_phi = running_mean(phi[ray, mask], int(1.5 / dr))
+        delta_phi = smooth_phi[-1] - phi0
+        atten[ray, mask] = zphi_atten(z[ray, mask], dr, delta_phi, b,
+                                      opt_gamma)
+        atten[ray] = (2 * dr * atten[ray]).cumsum()
+
+    atten[snr < 0.0] = np.nan
+    atten[np.isnan(snr)] = np.nan
+    return atten * dB
+
 @attenAlgs.register('SC',
         [datatypes.SNR, datatypes.Reflectivity, datatypes.PhiDP],
         ('H', 'V'), zphi_coeffs, dr=lambda d: d.gate_length,
@@ -97,9 +150,11 @@ def self_consistent(snr, z, phi, b, gamma, dr, phi0):
         smooth_phi = running_mean(phi[ray, mask], int(1.5 / dr))
         delta_phi = smooth_phi[-1] - phi0
         try:
-            atten[ray, mask] = tuned_zphi(z[ray, mask],
+            opt_gamma = tuned_zphi(z[ray, mask],
                     running_mean(phi[ray, mask], int(1.0 / dr)), dr,
                     delta_phi, b, gamma)
+            atten[ray, mask] = zphi_atten(z[ray, mask], dr, delta_phi, b,
+                    opt_gamma)
             atten[ray] = (2 * dr * atten[ray]).cumsum()
         except RuntimeError:
             print "Minimizer failed on ray: %d" % ray
@@ -128,8 +183,8 @@ def zphi_error(gamma, z, phi, dr, delta_phi, b):
     return np.abs(phi - phi_calc).mean()
 
 def tuned_zphi(z, phi, dr, delta_phi, b=0.7644, gamma_default=0.1):
-    gamma_min = 0.01 * gamma_default
-    gamma_max = 10 * gamma_default
+    gamma_min = 0.1 * gamma_default
+    gamma_max = 2 * gamma_default
     ret = so.minimize_scalar(zphi_error, bounds=(gamma_min, gamma_max),
                              args=(z, phi, dr, delta_phi, b), method='Bounded')
     if ret.success:
@@ -139,7 +194,7 @@ def tuned_zphi(z, phi, dr, delta_phi, b=0.7644, gamma_default=0.1):
         raise RuntimeError(ret.message)
         gamma = gamma_default
     #print 'Running zphi with gamma: %f' % gamma
-    return zphi_atten(z, dr, delta_phi, b, gamma)
+    return gamma
 
 
 @attenAlgs.register('ZPHI',
@@ -209,7 +264,7 @@ bringi_coeffs = {('S', 'H') : 0.016, ('S', 'diff') : 0.00367,
         ('C', 'H') : 0.054, ('C', 'diff') : 0.0157,
         ('X', 'H') : 0.25, ('X', 'diff') : 0.05}
 
-@attenAlgs.register('Linear-Bringi', [datatypes.PhiDP], ('H', 'diff'), bringi_coeffs)
+#@attenAlgs.register('Linear-Bringi', [datatypes.PhiDP], ('H', 'diff'), bringi_coeffs)
 @attenAlgs.register('Linear', [datatypes.PhiDP], ('H', 'diff'), ka_coeffs)
 def linear(phi, coeff=0.08):
     try:
