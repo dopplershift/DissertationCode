@@ -102,6 +102,7 @@ def modified_self_consistent(snr, z, phi, b, gamma, dr, phi0):
     gammas = np.array(gammas)
     opt_gamma = np.median(gammas[~np.isnan(gammas)])
     modified_self_consistent.gammas = gammas
+    modified_self_consistent.opt_gamma = opt_gamma
 
     for ray in range(atten.shape[0]):
         mask = (~np.isnan(phi[ray])) & (snr[ray] > 20.)
@@ -183,8 +184,8 @@ def zphi_error(gamma, z, phi, dr, delta_phi, b):
     return np.abs(phi - phi_calc).mean()
 
 def tuned_zphi(z, phi, dr, delta_phi, b=0.7644, gamma_default=0.1):
-    gamma_min = 0.1 * gamma_default
-    gamma_max = 2 * gamma_default
+    gamma_min = 0.4 * gamma_default
+    gamma_max = 1.6 * gamma_default
     ret = so.minimize_scalar(zphi_error, bounds=(gamma_min, gamma_max),
                              args=(z, phi, dr, delta_phi, b), method='Bounded')
     if ret.success:
