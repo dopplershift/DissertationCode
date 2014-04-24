@@ -98,17 +98,17 @@ RhoHV = DataType(name='Co-Polar Cross-Correlation Coefficient',
 BackscatterPhase = DataType(name='Differential Phase on Backscatter',
     abbr=r'$\delta$')
 
-Attenuation = DataType(name='Attenuation', abbr='A')
-DiffAtten = DataType(name='Differential Attenuation', abbr=r'$A_D$')
+Attenuation = DataType(name='Attenuation', abbr=r'$\alpha$')
+DiffAtten = DataType(name='Differential Attenuation', abbr=r'$\alpha_D$')
 
-SpecAttenuation = DataType(name='Specific Attenuation', abbr=r'$\alpha$')
+SpecAttenuation = DataType(name='Specific Attenuation', abbr=r'$A$')
 SpecDiffAtten = DataType(name='Specific Differential Attenuation',
-        abbr=r'$\alpha_D$')
+        abbr=r'$A_D$')
 
-AttenDelta = DataType('Attenuation Difference', r'$\Delta A$')
+AttenDelta = DataType('Attenuation Difference', r'$\Delta \alpha$')
 SpecAttenDelta = DataType('Specific Attenuation Difference',
     r'$\Delta \alpha$')
-DiffAttenDelta = DataType('Differential Attenuation Difference', r'$\Delta A_D$')
+DiffAttenDelta = DataType('Differential Attenuation Difference', r'$\Delta \alpha_D$')
 SpecDiffAttenDelta = DataType('Specific Differential Attenuation Difference',
     r'$\Delta \alpha_D$')
 PhiDelta = DataType('Differential Phase Difference', r'$\Delta \Phi_{DP}$')
