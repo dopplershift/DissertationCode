@@ -58,6 +58,8 @@ def process_all_atten(data_cache, default_source='average'):
     for d in data:
         d.fields.default_keys['source'] = default_source
         attenAlgs.runAll(d, var='H')
+        attenAlgs.runAll(d, var='V')
         attenAlgs.runAll(d, var='diff')
         calc_specific_atten(d, datatypes.Attenuation, pol='H')
+        calc_specific_atten(d, datatypes.Attenuation, pol='V')
         calc_specific_atten(d, datatypes.DiffAtten, pol=None)
