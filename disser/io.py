@@ -352,6 +352,9 @@ class NetCDFRadarData(NetCDFData):
             source='ts')] = self['atten_ts_' + pol]
 
         mean_atten = self.nc.variables['MeanAtten'][:]
+        # Need to adjust for vertical channel
+        if pol == 'V':
+            mean_atten /= self.nc.variables['MeanDiffAtten'][:]
         # This way, when we take the mean, any set of pulses with a 0
         # ends up nan. This way empty attenuation pulses don't end up
         # producing a biased value, they just end up masked
