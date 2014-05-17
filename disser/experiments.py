@@ -17,9 +17,23 @@ def script_args(desc=''):
             default=False)
     return parser
 
-def model_sorter(k):
+def exp_sorter(k):
     # Map certain experiments to sort to front or end
     return k[0], {'Control':'@', 'Combined':'}'}.get(k[1], k[1])
+
+def make_spatial_key(data):
+    exp_key = 'Control'
+    if data.runinfo.AxisRatioCalc != 'Brandes':
+        exp_key = 'Combined'
+    elif data.runinfo.RadarAntennaCutoff != 'MainLobe':
+        exp_key = 'Sidelobe'
+    elif data.gate_length > 125:
+        exp_key = 'Range Resolution'
+    elif data.radialWidth > 1.5:
+        exp_key = 'Radial Width'
+    elif data.beamwidth > 1.5:
+        exp_key = 'Beamwidth'
+    return data.waveBand, exp_key
 
 def make_model_key(data):
     diff_count = 0
@@ -41,10 +55,17 @@ def make_model_key(data):
         exp_key = 'Combined'
     return data.waveBand, exp_key
 
+def load_spatial_experiments(data_dir, glob='*'):
+    data_cache = DataCache(data_dir, make_spatial_key, ('band', 'exp'),
+        pattern=glob)
+    data_cache.key_sorter = exp_sorter
+    wavelengths,exps = data_cache.sub_keys()
+    return data_cache
+
 def load_model_experiments(data_dir, glob='*'):
     data_cache = DataCache(data_dir, make_model_key, ('band', 'exp'),
         pattern=glob)
-    data_cache.key_sorter = model_sorter
+    data_cache.key_sorter = exp_sorter
     wavelengths,exps = data_cache.sub_keys()
     return data_cache
 
