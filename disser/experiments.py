@@ -5,10 +5,21 @@ are specific to my datasets.
 
 import numpy as np
 import quantities as pq
+import scipy.stats as ss
 
 from .io import DataCache
 from .atten import calc_specific_atten, attenAlgs
 from . import datatypes
+
+def regress_stats(truth, data):
+    residuals = data - truth
+    bias = residuals.mean()
+    mse = (residuals * residuals).mean()
+    corr = ss.pearsonr(truth, data)[0]
+    return bias, mse, corr*corr
+
+def write_stats(fp, exp, pol, bias, mse, r_sq):
+    fp.write(' & '.join(map(str, (exp, pol, bias, mse, r_sq))) + '\n')
 
 def script_args(desc=''):
     from argparse import ArgumentParser
