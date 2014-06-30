@@ -21,7 +21,7 @@ def regress_stats(truth, data):
 def write_stats(fp, exp, pol, alg, bias, mse, r_sq):
     if pol is None:
         pol = 'Differential'
-    fp.write('%s & %s & %s & %.4f & %.4f & %.4f\n' % (exp, pol, alg, bias, mse, r_sq))
+    fp.write('        %s & %s & %s & %.4f & %.4f & %.4f\\\\\n' % (exp, pol, alg, bias, mse, r_sq))
 
 def script_args(desc=''):
     from argparse import ArgumentParser
